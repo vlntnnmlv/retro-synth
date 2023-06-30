@@ -1,86 +1,93 @@
-/*
- *
- * ao_example.c
- *
- *     Written by Stan Seibert - July 2001
- *
- * Legal Terms:
- *
- *     This source file is released into the public domain.  It is
- *     distributed without any warranty; without even the implied
- *     warranty * of merchantability or fitness for a particular
- *     purpose.
- *
- * Function:
- *
- *     This program opens the default driver and plays a 440 Hz tone for
- *     one second.
- *
- * Compilation command line (for Linux systems):
- *
- *     gcc -o ao_example ao_example.c -lao -ldl -lm
- *
- */
+#include <cstdint>
+#include <SDL2/SDL.h>
 
-#include <stdio.h>
-#include <string.h>
-#include <ao/ao.h>
-#include <math.h>
-
-#define BUF_SIZE 4096
-
-int main(int argc, char **argv)
+void audio_callback(void* userdata, uint8_t* stream, int len)
 {
-	ao_device *device;
-	ao_sample_format format;
-	int default_driver;
-	char *buffer;
-	int buf_size;
-	int sample;
-	float freq = 440.0;
-	int i;
+    uint64_t* samples_played = (uint64_t*)userdata;
+    float* fstream = (float*)(stream);
+    static const float volume = 0.2;
+    static const float frequency = 200.0;
 
-	/* -- Initialize -- */
+    for(int sid = 0; sid < (len / 8); ++sid)
+    {
+        double time = (*samples_played + sid) / 44100.0;
+        fstream[2 * sid + 0] = volume * sin(frequency * 2.0 * M_PI * time); /* L */
+        fstream[2 * sid + 1] = volume * sin(frequency * 2.0 * M_PI * time); /* R */
+    }
 
-	fprintf(stderr, "libao example program\n");
+    *samples_played += (len / 8);
+}
 
-	ao_initialize();
+int main(int argc, char* argv[])
+{
+    uint64_t samples_played = 0;
 
-	/* -- Setup for default driver -- */
+    if(SDL_Init(SDL_INIT_AUDIO) < 0)
+    {
+        fprintf(stderr, "Error initializing SDL. SDL_Error: %s\n", SDL_GetError());
+        return -1;
+    }
 
-	default_driver = ao_default_driver_id();
 
-        memset(&format, 0, sizeof(format));
-	format.bits = 16;
-	format.channels = 2;
-	format.rate = 44100;
-	format.byte_format = AO_FMT_LITTLE;
+    SDL_AudioSpec audio_spec_want, audio_spec;
+    SDL_memset(&audio_spec_want, 0, sizeof(audio_spec_want));
 
-	/* -- Open driver -- */
-	device = ao_open_live(default_driver, &format, NULL /* no options */);
-	if (device == NULL) {
-		fprintf(stderr, "Error opening device.\n");
-		return 1;
-	}
+    audio_spec_want.freq     = 44100;
+    audio_spec_want.format   = AUDIO_F32;
+    audio_spec_want.channels = 2;
+    audio_spec_want.samples  = 512;
+    audio_spec_want.callback = audio_callback;
+    audio_spec_want.userdata = (void*)&samples_played;
 
-	/* -- Play some stuff -- */
-	buf_size = format.bits/8 * format.channels * format.rate;
-	buffer = (char*)calloc(buf_size, sizeof(char));
+    SDL_AudioDeviceID audio_device_id = SDL_OpenAudioDevice(
+        NULL, 0,
+        &audio_spec_want, &audio_spec,
+        SDL_AUDIO_ALLOW_FORMAT_CHANGE
+    );
 
-	for (i = 0; i < format.rate; i++) {
-		sample = (int)(0.75 * 32768.0 *
-			sin(2 * M_PI * freq * ((float) i/format.rate)));
+    if(!audio_device_id)
+    {
+        fprintf(stderr, "Error creating SDL audio device. SDL_Error: %s\n", SDL_GetError());
+        SDL_Quit();
+        return -1;
+    }
 
-		/* Put the same stuff in left and right channel */
-		buffer[4*i] = buffer[4*i+2] = sample & 0xff;
-		buffer[4*i+1] = buffer[4*i+3] = (sample >> 8) & 0xff;
-	}
-	ao_play(device, buffer, buf_size);
+    int window_width  = 600;
+    int window_height = 600;
+    SDL_Window* window;
+    {
+        window = SDL_CreateWindow(
+            "SDL Tone Generator",
+            SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED,
+            window_width, window_height,
+            SDL_WINDOW_SHOWN | SDL_WINDOW_RESIZABLE
+        );
 
-	/* -- Close and shutdown -- */
-	ao_close(device);
+        if(!window)
+        {
+            fprintf(stderr, "Error creating SDL window. SDL_Error: %s\n", SDL_GetError());
+            SDL_Quit();
+            return -1;
+        }
+    }
 
-	ao_shutdown();
+    SDL_PauseAudioDevice(audio_device_id, 0);
 
-  return (0);
+    bool running = true;
+    while(running)
+    {
+        // Process input
+        SDL_Event sdl_event;
+        while(SDL_PollEvent(&sdl_event) != 0)
+        {
+            if(sdl_event.type == SDL_QUIT)
+                running = false;
+        }
+    }
+
+    SDL_DestroyWindow(window);
+    SDL_CloseAudioDevice(audio_device_id);
+    SDL_Quit();
+
+    return 0;
 }
