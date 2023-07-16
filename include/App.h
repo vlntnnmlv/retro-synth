@@ -1,8 +1,10 @@
 #pragma once
 
 #include <SDL2/SDL.h>
-#include <vector>
 #include <cmath>
+#include <vector>
+#include <unordered_map>
+
 
 #include "AudioCallbackObject.h"
 
@@ -28,5 +30,8 @@ class App
         bool m_running;
         SDL_Keycode m_current_key;
         std::vector<SDL_Keycode> m_keys;
+
+        std::unordered_map<SDL_Keycode, bool> m_keys_pressed;
+
         AudioCallbackObject m_audio_callback_object;
 };

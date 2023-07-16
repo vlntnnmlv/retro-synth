@@ -20,6 +20,8 @@ App::App()
         SDLK_k
     };
 
+    m_keys_pressed = std::unordered_map<SDL_Keycode, bool>();
+
     init();
 }
 
@@ -120,7 +122,8 @@ void App::start()
 			}
 			if (sdl_event.type == SDL_KEYUP)
 			{
-                m_current_key = SDLK_UNKNOWN;
+                if (sdl_event.key.keysym.sym == m_current_key)
+                    m_current_key = SDLK_UNKNOWN;
 			}
         }
 
