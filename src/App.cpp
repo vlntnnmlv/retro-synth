@@ -25,7 +25,7 @@ App::App()
 
 App::~App()
 {
-    // SDL_DestroyWindow(window);
+    SDL_DestroyWindow(m_window);
     SDL_CloseAudioDevice(m_audio_device_id);
     SDL_Quit();
 }
@@ -74,6 +74,8 @@ int App::init_audio_device()
         return -1;
     }
 
+    SDL_PauseAudioDevice(m_audio_device_id, 0);
+
     return 0;
 }
 
@@ -101,6 +103,7 @@ int App::init_window()
 void App::start()
 {
     m_running = true;
+
     while (m_running)
     {
         SDL_Event sdl_event;
@@ -114,13 +117,13 @@ void App::start()
                     m_running = false;
 
                 m_current_key = sdl_event.key.keysym.sym;
-                SDL_PauseAudioDevice(m_audio_device_id, 0);
 			}
 			if (sdl_event.type == SDL_KEYUP)
 			{
-                SDL_PauseAudioDevice(m_audio_device_id, 1);
+                m_current_key = SDLK_UNKNOWN;
 			}
         }
+
         m_audio_callback_object.update_frequency(get_frequency(m_current_key));
     }
 }
