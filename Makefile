@@ -5,4 +5,4 @@ SRC_DIR                = ./src/
 INCLUDE_DIR            = ./include/
 
 all:
-	clang++ -o retro-synth.app $(SRC_DIR)*.cpp --std=c++17 -I$(SDL2_INCLUDE_DIR) -I$(SDL2_IMAGE_INCLUDE_DIR) -I$(INCLUDE_DIR) -F$(FRAMEWORKS_DIR) -framework SDL2 -framework SDL2_image
+	clang++ -o retro-synth.app $(SRC_DIR)*.cpp --std=c++20 -I$(SDL2_INCLUDE_DIR) -I$(SDL2_IMAGE_INCLUDE_DIR) -I$(INCLUDE_DIR) -F$(FRAMEWORKS_DIR) -framework SDL2 -framework SDL2_image

@@ -1,12 +1,11 @@
 #pragma once
 
 #include <SDL2/SDL.h>
-#include <cmath>
 #include <vector>
-#include <unordered_map>
+#include <cmath>
+#include <set>
 
-
-#include "AudioCallbackObject.h"
+#include "AudioEngine.h"
 
 class App
 {
@@ -21,17 +20,15 @@ class App
         int init_audio_device();
         int init_window();
 
-        float get_frequency(SDL_Keycode keycode);
+        void  loop();
 
-        SDL_AudioDeviceID m_audio_device_id;
-        SDL_Window* m_window;
-        int m_window_width;
-        int m_window_height;
-        bool m_running;
-        SDL_Keycode m_current_key;
-        std::vector<SDL_Keycode> m_keys;
-
-        std::unordered_map<SDL_Keycode, bool> m_keys_pressed;
-
-        AudioCallbackObject m_audio_callback_object;
+        SDL_AudioDeviceID        m_audio_device_id;
+        SDL_Window*              m_window;
+        SDL_Event                m_current_event;
+        SDL_Keycode              m_current_key;
+        int                      m_window_width;
+        int                      m_window_height;
+        bool                     m_running;
+        AudioEngine              m_audio_engine;
+        std::set<SDL_Keycode>    m_pressed_keys;
 };

@@ -1,26 +1,11 @@
 #include <iostream>
 
 #include "App.h"
+#include <set>
 
 App::App()
 {
-    m_keys = std::vector<SDL_Keycode> {
-        SDLK_a,
-        SDLK_w,
-        SDLK_s,
-        SDLK_e,
-        SDLK_d,
-        SDLK_f,
-        SDLK_t,
-        SDLK_g,
-        SDLK_y,
-        SDLK_h,
-        SDLK_u,
-        SDLK_j,
-        SDLK_k
-    };
-
-    m_keys_pressed = std::unordered_map<SDL_Keycode, bool>();
+    m_pressed_keys = std::set<SDL_Keycode>();
 
     init();
 }
@@ -35,7 +20,7 @@ App::~App()
 int App::init()
 {
     // SDL Audio subsystem initialization
-    if(SDL_Init(SDL_INIT_AUDIO) < 0)
+    if(SDL_Init(SDL_INIT_AUDIO | SDL_INIT_VIDEO) < 0)
     {
         fprintf(stderr, "Error initializing SDL. SDL_Error: %s\n", SDL_GetError());
         return -1;
@@ -60,14 +45,10 @@ int App::init_audio_device()
     audio_spec_want.channels = 2;
     audio_spec_want.samples  = 512;
 
-    audio_spec_want.callback = AudioCallbackObject::forward_callback;
-    audio_spec_want.userdata = &m_audio_callback_object;
+    audio_spec_want.callback = AudioEngine::callback;
+    audio_spec_want.userdata = &m_audio_engine;
 
-    m_audio_device_id = SDL_OpenAudioDevice(
-        NULL, 0,
-        &audio_spec_want, &audio_spec,
-        SDL_AUDIO_ALLOW_FORMAT_CHANGE
-    );
+    m_audio_device_id = SDL_OpenAudioDevice(NULL, 0, &audio_spec_want, &audio_spec, SDL_AUDIO_ALLOW_FORMAT_CHANGE);
 
     if(!m_audio_device_id)
     {
@@ -86,7 +67,7 @@ int App::init_window()
     m_window_width = 600;
     m_window_height = 600;
     m_window = SDL_CreateWindow(
-            "SDL Tone Generator",
+            "Retro-Synth",
             SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED,
             m_window_width, m_window_height,
             SDL_WINDOW_SHOWN | SDL_WINDOW_RESIZABLE
@@ -108,39 +89,44 @@ void App::start()
 
     while (m_running)
     {
-        SDL_Event sdl_event;
-        while(SDL_PollEvent(&sdl_event) != 0)
-        {
-            if(sdl_event.type == SDL_QUIT)
-                m_running = false;
-			if (sdl_event.type == SDL_KEYDOWN)
-			{
-                if (sdl_event.key.keysym.sym == SDLK_ESCAPE)
-                    m_running = false;
-
-                m_current_key = sdl_event.key.keysym.sym;
-			}
-			if (sdl_event.type == SDL_KEYUP)
-			{
-                if (sdl_event.key.keysym.sym == m_current_key)
-                    m_current_key = SDLK_UNKNOWN;
-			}
-        }
-
-        m_audio_callback_object.update_frequency(get_frequency(m_current_key));
+        loop();
     }
 }
 
-float App::get_frequency(SDL_Keycode keycode)
+void App::loop()
 {
-    auto it = std::find(m_keys.begin(), m_keys.end(), keycode);
-    int index = -1;
+    while(SDL_PollEvent(&m_current_event) != 0)
+    {
+        if(m_current_event.type == SDL_QUIT)
+            m_running = false;
+        if (m_current_event.type == SDL_KEYDOWN)
+        {
+            if (m_current_event.key.keysym.sym == SDLK_ESCAPE)
+                m_running = false;
 
-    if (it != m_keys.end())
-        index = it - m_keys.begin();
-    
-    if (index == -1)
-        return 0;
+            if (m_current_event.key.keysym.sym == SDLK_z)
+            {
+                m_audio_engine.decrease_octave();
+            }
 
-    return 440.0f * std::pow(2, index / 12.0f);
+            if (m_current_event.key.keysym.sym == SDLK_x)
+            {
+                m_audio_engine.increase_octave();
+            }
+
+            if (!m_pressed_keys.contains(m_current_event.key.keysym.sym))
+            {
+                m_pressed_keys.insert(m_current_event.key.keysym.sym);
+                m_audio_engine.update_input(m_pressed_keys);
+            }
+        }
+        if (m_current_event.type == SDL_KEYUP)
+        {
+            if (m_pressed_keys.contains(m_current_event.key.keysym.sym))
+            {
+                m_pressed_keys.erase(m_current_event.key.keysym.sym);
+                m_audio_engine.update_input(m_pressed_keys);
+            }
+        }
+    }
 }
