@@ -3,5 +3,5 @@
 int main()
 {
     App *app = new App();
-    app->start(); 
+    app->start();
 }

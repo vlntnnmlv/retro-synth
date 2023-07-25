@@ -6,6 +6,8 @@
                 "${workspaceFolder}/**",
                 "/Library/Frameworks/SDL2.framework/Headers",
                 "/Library/Frameworks/SDL2_image.framework/Headers",
+                "/opt/homebrew/Cellar/glew/2.2.0_1/include",
+                "/opt/homebrew/Cellar/mesa-glu/9.0.2/include",
                 "./include"
             ],
             "defines": [],
@@ -14,7 +16,7 @@
                 "/Library/Frameworks"
             ],
             "compilerPath": "/usr/bin/clang",
-            "cStandard": "c20",
+            "cStandard": "c23",
             "cppStandard": "c++20",
             "intelliSenseMode": "macos-clang-arm64"
         }

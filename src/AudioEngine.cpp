@@ -4,6 +4,11 @@
 
 AudioEngine::AudioEngine()
 {
+    /*
+        | a# | b# |        | d# | e# | f# |
+    |  a  |  b  |  c  |  d  |  e  |  f  |  g  |
+    */
+
     m_possible_keys = std::vector<SDL_Keycode>
     {
         SDLK_a,
@@ -52,7 +57,7 @@ void AudioEngine::on_callback(uint8_t* stream, int len)
             if (amplitude <= 0.0f)
                 note->active = false;
 
-            sound += amplitude * m_oscillator(note->get_frequency(), m_audio_time, TRIANGLE);
+            sound += amplitude * m_oscillator(note->get_frequency(), m_audio_time);
         }
 
         fstream[2 * sid + 0] = sound; /* L */
@@ -141,14 +146,4 @@ Note AudioEngine::key2note(SDL_Keycode key)
     }
 
     return note;
-}
-
-SDL_Keycode AudioEngine::note2key(Note note)
-{
-    int index = note.type;
-
-    if (index != -1)
-        return m_possible_keys.at(index);
-    
-    return SDLK_UNKNOWN;
 }

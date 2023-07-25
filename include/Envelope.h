@@ -15,7 +15,7 @@ struct EnvelopeADSR
     {
         attackPeriod = 0.02f;
         decayPeriod = 0.02f;
-        releasePeriod = 1.0f;
+        releasePeriod = 0.1f;
 
         attackAmplitude = 1.0f;
         sustainAmplitude = 0.6f;

@@ -21,7 +21,6 @@ class AudioEngine
     private:
         void  on_callback(uint8_t* stream, int len);
         Note  key2note(SDL_Keycode key);
-        SDL_Keycode note2key(Note note);
 
         EnvelopeADSR m_envelope;
         Oscillator   m_oscillator;
