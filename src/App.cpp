@@ -1,11 +1,9 @@
 #include <iostream>
+#include <fstream>
+#include <streambuf>
 
-#include "App.h"
-#include <set>
-#include <SDL2/SDL_thread.h>
-
-#include <SDL2/SDL_opengl.h>
 #include "logo.h"
+#include "App.h"
 
 App::App()
 {
@@ -26,6 +24,8 @@ App::App()
         SDLK_j,
         SDLK_k
     };
+
+    m_time = 0;
 
     m_gl_program_id = 0;
     m_gl_vertex_pos_2d_location = -1;
@@ -56,6 +56,12 @@ App::~App()
     SDL_DestroyWindow(m_window);
     SDL_CloseAudioDevice(m_audio_device_id);
     SDL_Quit();
+}
+
+std::string *App::read_file(const char *path)
+{
+    std::ifstream ifs(path);
+    return new std::string(std::istreambuf_iterator<char>(ifs), std::istreambuf_iterator<char>());
 }
 
 int App::init()
@@ -170,21 +176,14 @@ int App::init_shaders()
     glGenVertexArrays(1, &m_gl_vao);
     glBindVertexArray(m_gl_vao);
 
-    const char *vert_shader_src = "\
-    #version 150 core                                                            \n\
-    in vec2 in_Position;                                                         \n\
-    in vec2 in_Texcoord;                                                         \n\
-    out vec2 Texcoord;                                                           \n\
-    void main()                                                                  \n\
-    {                                                                            \n\
-        Texcoord = in_Texcoord;                                                  \n\
-        gl_Position = vec4(in_Position, 0.0, 1.0);                               \n\
-    }                                                                            \n\
-    ";
+    m_gl_vertex_shader_content = read_file("shader/vertex.glsl");
 
     // Compile vertex shader
+    const char *tmp;
+    tmp = m_gl_vertex_shader_content->c_str();
+
     m_gl_vertex_shader = glCreateShader(GL_VERTEX_SHADER);
-    glShaderSource(m_gl_vertex_shader, 1, &vert_shader_src, NULL);
+    glShaderSource(m_gl_vertex_shader, 1, &(tmp), NULL);
     glCompileShader(m_gl_vertex_shader);
     glGetShaderiv(m_gl_vertex_shader, GL_COMPILE_STATUS, &status);
     if (status != GL_TRUE) {
@@ -194,20 +193,12 @@ int App::init_shaders()
         return 1;
     }
 
-    const char *frag_shader_src = "\
-    #version 150 core                                                            \n\
-    in vec2 Texcoord;                                                            \n\
-    out vec4 out_Color;                                                          \n\
-    uniform sampler2D tex;                                                       \n\
-    void main()                                                                  \n\
-    {                                                                            \n\
-        out_Color = texture(tex, Texcoord);                                      \n\
-    }                                                                            \n\
-    ";
+    m_gl_fragment_shader_content = read_file("shader/fragment.glsl");
+    tmp = m_gl_fragment_shader_content->c_str();
 
     // Compile fragment shader
     m_gl_fragment_shader = glCreateShader(GL_FRAGMENT_SHADER);
-    glShaderSource(m_gl_fragment_shader, 1, &frag_shader_src, NULL);
+    glShaderSource(m_gl_fragment_shader, 1, &tmp, NULL);
     glCompileShader(m_gl_fragment_shader);
     glGetShaderiv(m_gl_fragment_shader, GL_COMPILE_STATUS, &status);
     if (status != GL_TRUE) {
@@ -225,7 +216,7 @@ int App::init_shaders()
     glLinkProgram(m_gl_program_id);
     glUseProgram(m_gl_program_id);
 
-    glClearColor(1.0f, 0.0f, 0.0f, 1.0f);
+    glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
 
     return 0;
 }
@@ -304,6 +295,8 @@ void App::start()
 
 void App::loop()
 {
+    m_time = SDL_GetTicks() / 1000.0f;
+
     while(SDL_PollEvent(&m_current_event) != 0)
     {
         if(m_current_event.type == SDL_QUIT)

@@ -16,6 +16,7 @@ class AudioEngine
         void update_input(std::set<SDL_Keycode> keys_pressed);
         void increase_octave();
         void decrease_octave();
+        float get_audio_time();
         static void callback(void *userdata, uint8_t* stream, int len);
 
     private:

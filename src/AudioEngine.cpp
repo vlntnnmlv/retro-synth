@@ -32,6 +32,11 @@ AudioEngine::AudioEngine()
     m_envelope = EnvelopeADSR();
 }
 
+float AudioEngine::get_audio_time()
+{
+    return m_audio_time;
+}
+
 void AudioEngine::callback(void *userdata, uint8_t* stream, int len)
 {
     static_cast<AudioEngine*>(userdata)->on_callback(stream, len);

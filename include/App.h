@@ -1,12 +1,14 @@
 #pragma once
 
 #include <SDL2/SDL.h>
+#include <string>
 #include <vector>
 #include <cmath>
 #include <set>
 
 #include <GL/glew.h>
 #include <GL/glu.h>
+
 
 #include "AudioEngine.h"
 
@@ -30,6 +32,8 @@ class App
         void loop();
         void render();
 
+        std::string *read_file(const char *path);
+
         SDL_AudioDeviceID        m_audio_device_id;
         SDL_Window*              m_window;
         SDL_Event                m_current_event;
@@ -46,10 +50,14 @@ class App
         GLuint                   m_gl_program_id;
         GLuint                   m_gl_vertex_shader;
         GLuint                   m_gl_fragment_shader;
+        std::string              *m_gl_vertex_shader_content;
+        std::string              *m_gl_fragment_shader_content;
 
         GLint                    m_gl_vertex_pos_2d_location;
         GLuint                   m_gl_vao;
         GLuint                   m_gl_vbo;
         GLuint                   m_gl_ibo;
         GLuint                   m_gl_tex;
+
+        float                    m_time;
 };

@@ -15,5 +15,7 @@ INCLUDE                = -I$(SDL2_INCLUDE_DIR) -I$(SDL2_IMAGE_INCLUDE_DIR) -I$(G
 FRAMEWORKS             = -F$(FRAMEWORKS_DIR) -framework OpenGL -framework SDL2 -framework SDL2_image 
 LIBRARIES              = -L$(GLEW_LIB_DIR) -L$(GLU_LIB_DIR) -lGLEW -lglu
 
+NAME                   = retro-synth.app
+
 all:
-	clang++ -o retro-synth.app $(SRC_DIR)*.cpp --std=c++20 $(INCLUDE) $(FRAMEWORKS) $(LIBRARIES)
+	clang++ --std=c++20 $(SRC_DIR)*.cpp $(INCLUDE) $(FRAMEWORKS) $(LIBRARIES) -o $(NAME)
