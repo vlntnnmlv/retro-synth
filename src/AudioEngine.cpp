@@ -28,6 +28,8 @@ AudioEngine::AudioEngine()
 
     m_current_notes = std::set<Note>();
 
+    m_average_amplitude = 0;
+
     m_octave = 4;
     m_envelope = EnvelopeADSR();
 }
@@ -40,6 +42,12 @@ float AudioEngine::get_audio_time()
 void AudioEngine::callback(void *userdata, uint8_t* stream, int len)
 {
     static_cast<AudioEngine*>(userdata)->on_callback(stream, len);
+}
+
+float AudioEngine::get_amplitude()
+{
+    std::cout << "amp " << m_average_amplitude << "\n";
+    return m_average_amplitude;
 }
 
 void AudioEngine::on_callback(uint8_t* stream, int len)
@@ -56,14 +64,21 @@ void AudioEngine::on_callback(uint8_t* stream, int len)
         float modifier = 1.0f / notes_quantity;
 
         float amplitude = 0.0f;
+        m_average_amplitude = 0.0f;
         for (auto note = m_current_notes.begin(); note != m_current_notes.end(); ++note)
         {
             amplitude = m_envelope.get_amplitude(*note, m_audio_time);
-            if (amplitude <= 0.0f)
+            if (note->timeOff > note->timeOn && amplitude <= 0.0f)
                 note->active = false;
 
+            m_average_amplitude += amplitude;
             sound += amplitude * m_oscillator(note->get_frequency(), m_audio_time);
         }
+
+        if (notes_quantity != 0)
+            m_average_amplitude /= (float)notes_quantity;
+        else
+            m_average_amplitude = 0;
 
         fstream[2 * sid + 0] = sound; /* L */
         fstream[2 * sid + 1] = sound; /* R */

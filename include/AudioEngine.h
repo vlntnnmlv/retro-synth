@@ -17,6 +17,7 @@ class AudioEngine
         void increase_octave();
         void decrease_octave();
         float get_audio_time();
+        float get_amplitude();
         static void callback(void *userdata, uint8_t* stream, int len);
 
     private:
@@ -26,6 +27,7 @@ class AudioEngine
         EnvelopeADSR m_envelope;
         Oscillator   m_oscillator;
         float        m_frequency;
+        float        m_average_amplitude;
         float        m_audio_time;
         int          m_samples_played;
 

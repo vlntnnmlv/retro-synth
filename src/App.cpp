@@ -4,6 +4,7 @@
 
 #include "logo.h"
 #include "App.h"
+#include "Utility.h"
 
 App::App()
 {
@@ -56,12 +57,6 @@ App::~App()
     SDL_DestroyWindow(m_window);
     SDL_CloseAudioDevice(m_audio_device_id);
     SDL_Quit();
-}
-
-std::string *App::read_file(const char *path)
-{
-    std::ifstream ifs(path);
-    return new std::string(std::istreambuf_iterator<char>(ifs), std::istreambuf_iterator<char>());
 }
 
 int App::init()
@@ -146,13 +141,13 @@ int App::init_video()
         return 1;
     }
 
-    //Use Vsync
+    // Use VSYNC
     if(SDL_GL_SetSwapInterval(1) < 0)
     {
         printf("Warning: Unable to set VSync! SDL Error: %s\n", SDL_GetError());
     }
 
-    //Initialize GLEW
+    // Initialize GLEW
     glewExperimental = GL_TRUE;
     GLenum glewError = glewInit();
     if(glewError != GLEW_OK)
@@ -160,7 +155,7 @@ int App::init_video()
         printf( "Error initializing GLEW! %s\n", glewGetErrorString( glewError ) );
     }
 
-    //Initialize OpenGL
+    // Initialize Shaders
     init_shaders();
     init_geometry();
     init_textures();
@@ -176,14 +171,12 @@ int App::init_shaders()
     glGenVertexArrays(1, &m_gl_vao);
     glBindVertexArray(m_gl_vao);
 
-    m_gl_vertex_shader_content = read_file("shader/vertex.glsl");
-
     // Compile vertex shader
-    const char *tmp;
-    tmp = m_gl_vertex_shader_content->c_str();
+    m_gl_vertex_shader_content = read_file("shader/vertex.glsl");
+    const char *vertex_shader_source = m_gl_vertex_shader_content->c_str();
 
     m_gl_vertex_shader = glCreateShader(GL_VERTEX_SHADER);
-    glShaderSource(m_gl_vertex_shader, 1, &(tmp), NULL);
+    glShaderSource(m_gl_vertex_shader, 1, &vertex_shader_source, NULL);
     glCompileShader(m_gl_vertex_shader);
     glGetShaderiv(m_gl_vertex_shader, GL_COMPILE_STATUS, &status);
     if (status != GL_TRUE) {
@@ -193,12 +186,12 @@ int App::init_shaders()
         return 1;
     }
 
-    m_gl_fragment_shader_content = read_file("shader/fragment.glsl");
-    tmp = m_gl_fragment_shader_content->c_str();
-
     // Compile fragment shader
+    m_gl_fragment_shader_content = read_file("shader/fragment.glsl");
+    const char *fragment_shader_source = m_gl_fragment_shader_content->c_str();
+
     m_gl_fragment_shader = glCreateShader(GL_FRAGMENT_SHADER);
-    glShaderSource(m_gl_fragment_shader, 1, &tmp, NULL);
+    glShaderSource(m_gl_fragment_shader, 1, &fragment_shader_source, NULL);
     glCompileShader(m_gl_fragment_shader);
     glGetShaderiv(m_gl_fragment_shader, GL_COMPILE_STATUS, &status);
     if (status != GL_TRUE) {
@@ -223,7 +216,7 @@ int App::init_shaders()
 
 int App::init_geometry()
 {
-    const GLfloat verts[6][4] = {
+    const GLfloat verts[4][4] = {
         //  x      y      s      t
         { -1.0f, -1.0f,  0.0f,  1.0f }, // BL
         { -1.0f,  1.0f,  0.0f,  0.0f }, // TL
@@ -255,6 +248,10 @@ int App::init_geometry()
     glVertexAttribPointer(tex_attr_loc, 2, GL_FLOAT, GL_FALSE, 4*sizeof(GLfloat), (void*)(2*sizeof(GLfloat)));
     glEnableVertexAttribArray(tex_attr_loc);
 
+    glUniform2f(glGetUniformLocation(m_gl_program_id, "in_Resolution"), m_window_width, m_window_height);
+    glUniform1f(glGetUniformLocation(m_gl_program_id, "in_Time"), m_audio_engine.get_audio_time());
+    glUniform1f(glGetUniformLocation(m_gl_program_id, "in_Amplitude"), m_audio_engine.get_amplitude());
+
     return 0;
 }
 
@@ -278,6 +275,10 @@ int App::init_textures()
 
 void App::render()
 {
+    // Set shader uniforms
+    glUniform1f(glGetUniformLocation(m_gl_program_id, "in_Time"), m_audio_engine.get_audio_time());
+    glUniform1f(glGetUniformLocation(m_gl_program_id, "in_Amplitude"), m_audio_engine.get_amplitude());
+
     glClear(GL_COLOR_BUFFER_BIT);
     glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, NULL);
     SDL_GL_SwapWindow(m_window);
@@ -286,7 +287,6 @@ void App::render()
 void App::start()
 {
     m_running = true;
-
     while (m_running)
     {
         loop();
@@ -295,50 +295,59 @@ void App::start()
 
 void App::loop()
 {
-    m_time = SDL_GetTicks() / 1000.0f;
+    Uint64 frame_start_time = SDL_GetPerformanceCounter();
 
     while(SDL_PollEvent(&m_current_event) != 0)
     {
-        if(m_current_event.type == SDL_QUIT)
-            m_running = false;
-        if (m_current_event.type == SDL_KEYDOWN)
-        {
-            if (m_current_event.key.keysym.sym == SDLK_ESCAPE)
-                m_running = false;
-
-            if (m_current_event.key.keysym.sym == SDLK_z)
-            {
-                m_audio_engine.decrease_octave();
-            }
-
-            if (m_current_event.key.keysym.sym == SDLK_x)
-            {
-                m_audio_engine.increase_octave();
-            }
-
-            auto it = std::find(m_possible_keys.begin(), m_possible_keys.end(), m_current_event.key.keysym.sym);
-            if (it != m_possible_keys.end())
-            {
-                if (!m_pressed_keys.contains(m_current_event.key.keysym.sym))
-                {
-                    m_pressed_keys.insert(m_current_event.key.keysym.sym);
-                    m_audio_engine.update_input(m_pressed_keys);
-                }
-            }
-        }
-        if (m_current_event.type == SDL_KEYUP)
-        {
-            auto it = std::find(m_possible_keys.begin(), m_possible_keys.end(), m_current_event.key.keysym.sym);
-            if (it != m_possible_keys.end())
-            {
-                if (m_pressed_keys.contains(m_current_event.key.keysym.sym))
-                {
-                    m_pressed_keys.erase(m_current_event.key.keysym.sym);
-                    m_audio_engine.update_input(m_pressed_keys);
-                }
-            }
-        }
-
-        render();
+        poll_event();
     }
+
+    render();
+
+    Uint64 frame_end_time = SDL_GetPerformanceCounter();
+    m_delta_time = (frame_end_time - frame_start_time) / (float)SDL_GetPerformanceFrequency();
+    m_time += m_delta_time;
+}
+
+void App::poll_event()
+{
+    if(m_current_event.type == SDL_QUIT)
+        m_running = false;
+    if (m_current_event.type == SDL_KEYDOWN)
+    {
+        if (m_current_event.key.keysym.sym == SDLK_ESCAPE)
+            m_running = false;
+
+        if (m_current_event.key.keysym.sym == SDLK_z)
+        {
+            m_audio_engine.decrease_octave();
+        }
+
+        if (m_current_event.key.keysym.sym == SDLK_x)
+        {
+            m_audio_engine.increase_octave();
+        }
+
+        auto it = std::find(m_possible_keys.begin(), m_possible_keys.end(), m_current_event.key.keysym.sym);
+        if (it != m_possible_keys.end())
+        {
+            if (!m_pressed_keys.contains(m_current_event.key.keysym.sym))
+            {
+                m_pressed_keys.insert(m_current_event.key.keysym.sym);
+                m_audio_engine.update_input(m_pressed_keys);
+            }
+        }
+    }
+    if (m_current_event.type == SDL_KEYUP)
+    {
+        auto it = std::find(m_possible_keys.begin(), m_possible_keys.end(), m_current_event.key.keysym.sym);
+        if (it != m_possible_keys.end())
+        {
+            if (m_pressed_keys.contains(m_current_event.key.keysym.sym))
+            {
+                m_pressed_keys.erase(m_current_event.key.keysym.sym);
+                m_audio_engine.update_input(m_pressed_keys);
+            }
+        }
+    }   
 }

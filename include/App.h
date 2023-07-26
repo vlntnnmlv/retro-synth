@@ -30,9 +30,8 @@ class App
         int init_textures();
 
         void loop();
+        void poll_event();
         void render();
-
-        std::string *read_file(const char *path);
 
         SDL_AudioDeviceID        m_audio_device_id;
         SDL_Window*              m_window;
@@ -60,4 +59,5 @@ class App
         GLuint                   m_gl_tex;
 
         float                    m_time;
+        float                    m_delta_time;
 };
