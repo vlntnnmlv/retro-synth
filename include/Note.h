@@ -1,7 +1,6 @@
 #pragma once
 
-#include <SDL2/SDL.h>
-#include <vector>
+#include <cmath>
 
 enum NoteType
 {
@@ -25,41 +24,16 @@ struct Note
     NoteType type;
     int      octave;
 
-    mutable float timeOn;
-    mutable float timeOff;
+    mutable float time_on;
+    mutable float time_off;
     mutable bool  active;
 
-    Note()
-    {
-        type    = UNKNOWN;
-        octave  = 0;
-        timeOn  = 0.0f;
-        timeOff = 0.0f;
-        active  = false;
-    }
+    Note();
 
-    float get_frequency() const
-    {
-        return 27.5f * std::pow(2, octave) * std::pow(2, type / 12.0f); 
-    }
+    float get_frequency() const;
+    void  set_on(float time);
+    void  set_off(float time);
 
-    void setOn(float time)
-    {
-        timeOn = time;
-    }
-
-    void setOff(float time)
-    {
-        timeOff = time;
-    }
-
-    bool operator=(const Note& other) const
-    {
-        return type == other.type && octave == other.octave;
-    }
-
-    bool operator<(const Note& other) const
-    {
-        return type < other.type && octave <= other.octave;
-    }
+    bool operator=(const Note& other) const;
+    bool operator<(const Note& other) const;
 };

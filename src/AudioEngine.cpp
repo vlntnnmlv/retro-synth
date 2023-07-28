@@ -46,7 +46,6 @@ void AudioEngine::callback(void *userdata, uint8_t* stream, int len)
 
 float AudioEngine::get_amplitude()
 {
-    std::cout << "amp " << m_average_amplitude << "\n";
     return m_average_amplitude;
 }
 
@@ -64,21 +63,24 @@ void AudioEngine::on_callback(uint8_t* stream, int len)
         float modifier = 1.0f / notes_quantity;
 
         float amplitude = 0.0f;
-        m_average_amplitude = 0.0f;
+        float average_amplitude = 0.0f;
+        
         for (auto note = m_current_notes.begin(); note != m_current_notes.end(); ++note)
         {
             amplitude = m_envelope.get_amplitude(*note, m_audio_time);
-            if (note->timeOff > note->timeOn && amplitude <= 0.0f)
+            if (note->time_off > note->time_on && amplitude <= 0.0f)
                 note->active = false;
 
-            m_average_amplitude += amplitude;
-            sound += amplitude * m_oscillator(note->get_frequency(), m_audio_time);
+            average_amplitude += amplitude;
+            sound += amplitude * m_oscillator.oscillate(note->get_frequency(), m_audio_time, OscilatorType::TRIANGLE);
         }
 
         if (notes_quantity != 0)
-            m_average_amplitude /= (float)notes_quantity;
+            average_amplitude /= (float)notes_quantity;
         else
-            m_average_amplitude = 0;
+            average_amplitude = 0;
+        
+        m_average_amplitude = average_amplitude;
 
         fstream[2 * sid + 0] = sound; /* L */
         fstream[2 * sid + 1] = sound; /* R */
@@ -118,10 +120,10 @@ void AudioEngine::update_input(std::set<SDL_Keycode> keys_pressed)
     // release notes which are not in the input
     for (auto note = m_current_notes.begin(); note != m_current_notes.end(); ++note)
     {
-        if (!notes_pressed.contains(*note) && note->timeOff == 0.0f)
+        if (!notes_pressed.contains(*note) && note->time_off == 0.0f)
         {
             std::cout << "Note released: " << note->type << "\n";
-            note->timeOff = m_audio_time;
+            note->time_off = m_audio_time;
         }
     }
 
@@ -131,15 +133,15 @@ void AudioEngine::update_input(std::set<SDL_Keycode> keys_pressed)
         bool isNotePlayed = m_current_notes.contains(note);
         if (!isNotePlayed)
         {
-            note.timeOn = m_audio_time;
+            note.time_on = m_audio_time;
             note.active = true;
             m_current_notes.insert(note);
         }
         else
         {
             auto playing_note = m_current_notes.find(note);
-            playing_note->timeOff = 0.0f;
-            playing_note->timeOn = m_audio_time;
+            playing_note->time_off = 0.0f;
+            playing_note->time_on = m_audio_time;
             playing_note->active = true;
         }
     } 
