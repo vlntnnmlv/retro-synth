@@ -4,6 +4,7 @@
 #include <cmath>
 #include <vector>
 #include <set>
+#include <list>
 
 #include "Envelope.h"
 #include "Oscillator.h"
@@ -32,6 +33,6 @@ class AudioEngine
         int          m_samples_played;
 
         std::vector<SDL_Keycode>  m_possible_keys;
-        std::vector<Note>         m_current_notes;
+        std::list<Note>           m_current_notes;
         int                       m_octave;
 };

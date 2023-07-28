@@ -27,7 +27,7 @@ AudioEngine::AudioEngine()
         SDLK_k
     };
 
-    m_current_notes = std::vector<Note>();
+    m_current_notes = std::list<Note>();
 
     m_average_amplitude = 0;
 
@@ -61,8 +61,6 @@ void AudioEngine::on_callback(uint8_t* stream, int len)
         float sound = 0.0f;
 
         int notes_quantity = m_current_notes.size();
-        if (notes_quantity == 0)
-            break;
         float modifier = 1.0f / notes_quantity;
 
         float amplitude = 0.0f;
@@ -72,8 +70,12 @@ void AudioEngine::on_callback(uint8_t* stream, int len)
         for (auto note = m_current_notes.begin(); note != m_current_notes.end(); ++note)
         {
             amplitude = m_envelope.get_amplitude(*note, m_audio_time);
-            if (note->time_off > note->time_on && amplitude <= 0.0f)
+            if (note->active && note->time_off > note->time_on && amplitude <= 0.0f)
+            {
                 note->active = false;
+                std::cout << "[T: " << m_audio_time << "] Note set inactive: " << note->type << "\n";
+                continue;
+            }
             average_amplitude += amplitude;
 
             current_freq = m_oscillator.oscillate(note->get_frequency(), m_audio_time);
@@ -93,12 +95,12 @@ void AudioEngine::on_callback(uint8_t* stream, int len)
 
     m_samples_played += (len / 8);
 
-    // TODO: Now this can modify container, while inputs are processed. Fix.
     auto note = m_current_notes.begin();
     while (note != m_current_notes.end())
     {
         if (!note->active)
         {
+            std::cout << "[T: " << m_audio_time << "] Note deleted: " << note->type << "\n";
             note = m_current_notes.erase(note);
         }
         else
@@ -128,6 +130,7 @@ void AudioEngine::update_input(std::set<SDL_Keycode> keys_pressed)
         if (it == notes_pressed.end() && note->time_off == 0.0f)
         {
             note->time_off = m_audio_time;
+            std::cout << "[T: " << m_audio_time << "] Note released: " << note->type << "\n";
         }
     }
 
@@ -140,12 +143,14 @@ void AudioEngine::update_input(std::set<SDL_Keycode> keys_pressed)
             note->time_on = m_audio_time;
             note->active = true;
             m_current_notes.push_back(*note);
+            std::cout << "[T: " << m_audio_time << "] Note added: " << note->type << "\n";
         }
-        else
+        else if(changed_note->time_off > changed_note->time_on)
         {
-            changed_note->time_on = 0.0f;
+            changed_note->time_off = 0.0f;
             changed_note->time_on = m_audio_time;
             changed_note->active = true;
+            std::cout << "[T: " << m_audio_time << "] Note was releasing, but pressed again: " << changed_note->type << "\n";
         }
     }
 }
