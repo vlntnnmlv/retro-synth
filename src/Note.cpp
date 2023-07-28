@@ -14,17 +14,7 @@ float Note::get_frequency() const
     return 27.5f * std::pow(2, octave) * std::pow(2, type / 12.0f); 
 }
 
-void Note::set_on(float time)
-{
-    time_on = time;
-}
-
-void Note::set_off(float time)
-{
-    time_off = time;
-}
-
-bool Note::operator=(const Note& other) const
+bool Note::operator==(const Note& other) const
 {
     return type == other.type && octave == other.octave;
 }

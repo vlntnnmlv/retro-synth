@@ -19,21 +19,19 @@ enum NoteType
     G_SHARP = 11
 };
 
-struct Note
+class Note
 {
-    NoteType type;
-    int      octave;
+    public:
+        Note();
 
-    mutable float time_on;
-    mutable float time_off;
-    mutable bool  active;
+        NoteType type;
+        int      octave;
+        float    time_on;
+        float    time_off;
+        bool     active;
 
-    Note();
+        float get_frequency() const;
 
-    float get_frequency() const;
-    void  set_on(float time);
-    void  set_off(float time);
-
-    bool operator=(const Note& other) const;
-    bool operator<(const Note& other) const;
+        bool operator==(const Note& other) const;
+        bool operator<(const Note& other) const;
 };

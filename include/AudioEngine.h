@@ -32,6 +32,6 @@ class AudioEngine
         int          m_samples_played;
 
         std::vector<SDL_Keycode>  m_possible_keys;
-        std::set<Note>            m_current_notes;
+        std::vector<Note>         m_current_notes;
         int                       m_octave;
 };

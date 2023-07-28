@@ -277,7 +277,8 @@ void App::render()
     // Set shader uniforms
     glUniform1f(glGetUniformLocation(m_gl_program_id, "in_Time"), m_audio_engine.get_audio_time());
     glUniform1f(glGetUniformLocation(m_gl_program_id, "in_Amplitude"), m_audio_engine.get_amplitude());
-
+    
+    // Redraw everything
     glClear(GL_COLOR_BUFFER_BIT);
     glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, NULL);
     SDL_GL_SwapWindow(m_window);

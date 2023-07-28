@@ -1,4 +1,5 @@
 #include <iostream>
+#include <algorithm>
 
 #include "AudioEngine.h"
 
@@ -26,7 +27,7 @@ AudioEngine::AudioEngine()
         SDLK_k
     };
 
-    m_current_notes = std::set<Note>();
+    m_current_notes = std::vector<Note>();
 
     m_average_amplitude = 0;
 
@@ -60,9 +61,12 @@ void AudioEngine::on_callback(uint8_t* stream, int len)
         float sound = 0.0f;
 
         int notes_quantity = m_current_notes.size();
+        if (notes_quantity == 0)
+            break;
         float modifier = 1.0f / notes_quantity;
 
         float amplitude = 0.0f;
+        float current_freq = 0.0f;
         float average_amplitude = 0.0f;
         
         for (auto note = m_current_notes.begin(); note != m_current_notes.end(); ++note)
@@ -70,9 +74,10 @@ void AudioEngine::on_callback(uint8_t* stream, int len)
             amplitude = m_envelope.get_amplitude(*note, m_audio_time);
             if (note->time_off > note->time_on && amplitude <= 0.0f)
                 note->active = false;
-
             average_amplitude += amplitude;
-            sound += amplitude * m_oscillator.oscillate(note->get_frequency(), m_audio_time, OscilatorType::TRIANGLE);
+
+            current_freq = m_oscillator.oscillate(note->get_frequency(), m_audio_time);
+            sound += amplitude * m_oscillator.oscillate(note->get_frequency(), m_audio_time);
         }
 
         if (notes_quantity != 0)
@@ -88,6 +93,7 @@ void AudioEngine::on_callback(uint8_t* stream, int len)
 
     m_samples_played += (len / 8);
 
+    // TODO: Now this can modify container, while inputs are processed. Fix.
     auto note = m_current_notes.begin();
     while (note != m_current_notes.end())
     {
@@ -105,46 +111,43 @@ void AudioEngine::on_callback(uint8_t* stream, int len)
 void AudioEngine::update_input(std::set<SDL_Keycode> keys_pressed)
 {
     // convert key codes into notes
-    std::set<Note> notes_pressed = std::set<Note>();
+    std::vector<Note> notes_pressed = std::vector<Note>();
     for (SDL_Keycode key : keys_pressed)
     {
         Note note = key2note(key);
         if (note.type != UNKNOWN)
         {
-            notes_pressed.insert(note);
-            std::cout << note.type << ", ";
+            notes_pressed.push_back(note);
         }
     }
-    std::cout << "end\n";
 
     // release notes which are not in the input
     for (auto note = m_current_notes.begin(); note != m_current_notes.end(); ++note)
     {
-        if (!notes_pressed.contains(*note) && note->time_off == 0.0f)
+        auto it = std::find(notes_pressed.begin(), notes_pressed.end(), *note);
+        if (it == notes_pressed.end() && note->time_off == 0.0f)
         {
-            std::cout << "Note released: " << note->type << "\n";
             note->time_off = m_audio_time;
         }
     }
 
     // add notes which are new in input
-    for (Note note : notes_pressed)
+    for (auto note = notes_pressed.begin(); note != notes_pressed.end(); ++note)
     {
-        bool isNotePlayed = m_current_notes.contains(note);
-        if (!isNotePlayed)
+        auto changed_note = std::find(m_current_notes.begin(), m_current_notes.end(), *note);
+        if (changed_note == m_current_notes.end())
         {
-            note.time_on = m_audio_time;
-            note.active = true;
-            m_current_notes.insert(note);
+            note->time_on = m_audio_time;
+            note->active = true;
+            m_current_notes.push_back(*note);
         }
         else
         {
-            auto playing_note = m_current_notes.find(note);
-            playing_note->time_off = 0.0f;
-            playing_note->time_on = m_audio_time;
-            playing_note->active = true;
+            changed_note->time_on = 0.0f;
+            changed_note->time_on = m_audio_time;
+            changed_note->active = true;
         }
-    } 
+    }
 }
 
 void AudioEngine::increase_octave() { m_octave += 1; }
