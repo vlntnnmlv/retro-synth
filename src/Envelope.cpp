@@ -2,12 +2,12 @@
 
 EnvelopeADSR::EnvelopeADSR()
 {
-    attackPeriod = 5.0f;
-    decayPeriod = 0.5f;
-    releasePeriod = 1.0f;
+    attackPeriod = 0.04f;
+    decayPeriod = 0.01f;
+    releasePeriod = 0.07f;
 
-    attackAmplitude = 1.0f;
-    sustainAmplitude = 0.6f;
+    attackAmplitude = 0.7f;
+    sustainAmplitude = 0.5f;
 }
 
 float EnvelopeADSR::get_amplitude(Note note, float time) const
