@@ -2,7 +2,7 @@
 
 #include <SDL2/SDL.h>
 
-enum class OscilatorType
+enum class OscillatorType
 {
     SINUS       = 0,
     SQUARE      = 1,
@@ -15,7 +15,7 @@ enum class OscilatorType
 class Oscillator
 {
     public:
-        float oscillate(float frequency, float time, OscilatorType type = OscilatorType::SINUS) const;
+        float oscillate(float frequency, float time, OscillatorType type = OscillatorType::SINUS) const;
 
     private:
         float F2AV(float frequency) const;

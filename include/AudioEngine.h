@@ -8,6 +8,7 @@
 #include "Envelope.h"
 #include "Oscillator.h"
 #include "Note.h"
+#include "Instrument.h"
 
 class AudioEngine
 {
@@ -33,4 +34,5 @@ class AudioEngine
 
         std::list<Note>           m_current_notes;
         int                       m_octave;
+        Instrument                *m_instrument;
 };

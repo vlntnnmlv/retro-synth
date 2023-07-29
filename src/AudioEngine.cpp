@@ -11,6 +11,7 @@ AudioEngine::AudioEngine()
 
     m_octave = 4;
     m_envelope = EnvelopeADSR();
+    m_instrument = new Instrument(std::list<OscillatorType> { OscillatorType::SINUS, OscillatorType::SAW_ANALOG } );
 }
 
 float AudioEngine::get_audio_time()
@@ -61,7 +62,7 @@ void AudioEngine::on_callback(uint8_t* stream, int len)
             }
             average_amplitude += amplitude;
 
-            current_freq = m_oscillator.oscillate(note->get_frequency(), m_audio_time, OscilatorType::SAW_ANALOG);
+            current_freq = m_instrument->get(*note, m_audio_time);// m_oscillator.oscillate(note->get_frequency(), m_audio_time, OscillatorType::SAW_ANALOG);
             sound += amplitude * current_freq;
         }
 

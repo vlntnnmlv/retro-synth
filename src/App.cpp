@@ -337,6 +337,19 @@ void App::poll_event()
 {
     if(m_current_event.type == SDL_QUIT)
         m_running = false;
+    if (m_current_event.type == SDL_WINDOWEVENT && m_current_event.window.event == SDL_WINDOWEVENT_RESIZED)
+    {
+        SDL_Window* win = SDL_GetWindowFromID(m_current_event.window.windowID);
+        if (win == m_window)
+        {
+            std::cout << "resizing.....\n";
+            m_window_width = m_current_event.window.data1;
+            m_window_height = m_current_event.window.data2;
+            // glUniform2f(glGetUniformLocation(m_gl_program_id, "in_Resolution"), m_window_width, m_window_height);
+        }
+    }
+
+    // TODO: Add MIDI input - http://www.music.mcgill.ca/~gary/rtmidi/index.html#license
     if (m_current_event.type == SDL_KEYDOWN)
     {
         if (m_current_event.key.keysym.sym == SDLK_ESCAPE)

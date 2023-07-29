@@ -1,20 +1,20 @@
 #include "Oscillator.h"
 
-float Oscillator::oscillate(float frequency, float time, OscilatorType type) const
+float Oscillator::oscillate(float frequency, float time, OscillatorType type) const
 {
     switch (type)
     {
-        case OscilatorType::SINUS:
+        case OscillatorType::SINUS:
             return sinus(frequency, time);
-        case OscilatorType::SQUARE:
+        case OscillatorType::SQUARE:
             return square(frequency, time);
-        case OscilatorType::TRIANGLE:
+        case OscillatorType::TRIANGLE:
             return triangle(frequency, time);
-        case OscilatorType::SAW_ANALOG:
+        case OscillatorType::SAW_ANALOG:
             return saw_analog(frequency, time);
-        case OscilatorType::SAW_DIGITAL:
+        case OscillatorType::SAW_DIGITAL:
             return saw_digital(frequency, time);
-        case OscilatorType::NOISE:
+        case OscillatorType::NOISE:
             return noise(frequency, time);
     }
 }
