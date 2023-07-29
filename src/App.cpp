@@ -7,7 +7,12 @@
 
 App::App()
 {
-    m_pressed_keys = std::set<SDL_Keycode>();
+    m_pressed_notes = std::list<Note>();
+
+    /*
+        | a# | b# |        | d# | e# | f# |
+    |  a  |  b  |  c  |  d  |  e  |  f  |  g  |
+    */
     m_possible_keys = std::vector<SDL_Keycode>
     {
         SDLK_a,
@@ -309,6 +314,25 @@ void App::loop()
     m_time += m_delta_time;
 }
 
+Note App::key2note(SDL_Keycode key)
+{
+    int index = -1;
+    auto it = std::find(m_possible_keys.begin(), m_possible_keys.end(), key);
+    if (it != m_possible_keys.end())
+    {
+        index = it - m_possible_keys.begin();
+    }
+
+    Note note;
+    if (index != -1)
+    {
+        note.type = (NoteType)index;
+        note.octave = m_audio_engine.get_octave();
+    }
+
+    return note;
+}
+
 void App::poll_event()
 {
     if(m_current_event.type == SDL_QUIT)
@@ -331,10 +355,12 @@ void App::poll_event()
         auto it = std::find(m_possible_keys.begin(), m_possible_keys.end(), m_current_event.key.keysym.sym);
         if (it != m_possible_keys.end())
         {
-            if (!m_pressed_keys.contains(m_current_event.key.keysym.sym))
+            Note note = key2note(m_current_event.key.keysym.sym);
+            auto it = std::find(m_pressed_notes.begin(), m_pressed_notes.end(), note);
+            if (it == m_pressed_notes.end())
             {
-                m_pressed_keys.insert(m_current_event.key.keysym.sym);
-                m_audio_engine.update_input(m_pressed_keys);
+                m_pressed_notes.push_back(key2note(m_current_event.key.keysym.sym));
+                m_audio_engine.update_input(m_pressed_notes);
             }
         }
     }
@@ -343,10 +369,12 @@ void App::poll_event()
         auto it = std::find(m_possible_keys.begin(), m_possible_keys.end(), m_current_event.key.keysym.sym);
         if (it != m_possible_keys.end())
         {
-            if (m_pressed_keys.contains(m_current_event.key.keysym.sym))
+            Note note = key2note(m_current_event.key.keysym.sym);
+            auto it = std::find(m_pressed_notes.begin(), m_pressed_notes.end(), note);
+            if (it != m_pressed_notes.end())
             {
-                m_pressed_keys.erase(m_current_event.key.keysym.sym);
-                m_audio_engine.update_input(m_pressed_keys);
+                m_pressed_notes.erase(it);
+                m_audio_engine.update_input(m_pressed_notes);
             }
         }
     }   

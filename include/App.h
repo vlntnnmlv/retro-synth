@@ -15,10 +15,11 @@ class App
 {
     public:
         App();
+        ~App();
+
         void start();
 
     private:
-        ~App();
 
         int init();
         int init_audio();
@@ -32,16 +33,17 @@ class App
         void poll_event();
         void render();
 
-        SDL_AudioDeviceID        m_audio_device_id;
+        Note key2note(SDL_Keycode key);
+
         SDL_Window*              m_window;
-        SDL_Event                m_current_event;
-        SDL_Keycode              m_current_key;
         int                      m_window_width;
         int                      m_window_height;
+        SDL_Event                m_current_event;
         bool                     m_running;
-        AudioEngine              m_audio_engine;
-        std::set<SDL_Keycode>    m_pressed_keys;
 
+        SDL_AudioDeviceID        m_audio_device_id;
+        AudioEngine              m_audio_engine;
+        std::list<Note>          m_pressed_notes;
         std::vector<SDL_Keycode> m_possible_keys;
 
         SDL_GLContext            m_gl_context;

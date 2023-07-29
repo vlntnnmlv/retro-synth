@@ -5,28 +5,6 @@
 
 AudioEngine::AudioEngine()
 {
-    /*
-        | a# | b# |        | d# | e# | f# |
-    |  a  |  b  |  c  |  d  |  e  |  f  |  g  |
-    */
-
-    m_possible_keys = std::vector<SDL_Keycode>
-    {
-        SDLK_a,
-        SDLK_w,
-        SDLK_s,
-        SDLK_e,
-        SDLK_d,
-        SDLK_f,
-        SDLK_t,
-        SDLK_g,
-        SDLK_y,
-        SDLK_h,
-        SDLK_u,
-        SDLK_j,
-        SDLK_k
-    };
-
     m_current_notes = std::list<Note>();
 
     m_average_amplitude = 0;
@@ -48,6 +26,11 @@ void AudioEngine::callback(void *userdata, uint8_t* stream, int len)
 float AudioEngine::get_amplitude()
 {
     return m_average_amplitude;
+}
+
+int AudioEngine::get_octave()
+{
+    return m_octave;
 }
 
 void AudioEngine::on_callback(uint8_t* stream, int len)
@@ -110,19 +93,8 @@ void AudioEngine::on_callback(uint8_t* stream, int len)
     }
 }
 
-void AudioEngine::update_input(std::set<SDL_Keycode> keys_pressed)
+void AudioEngine::update_input(std::list<Note> notes_pressed)
 {
-    // convert key codes into notes
-    std::vector<Note> notes_pressed = std::vector<Note>();
-    for (SDL_Keycode key : keys_pressed)
-    {
-        Note note = key2note(key);
-        if (note.type != UNKNOWN)
-        {
-            notes_pressed.push_back(note);
-        }
-    }
-
     // release notes which are not in the input
     for (auto note = m_current_notes.begin(); note != m_current_notes.end(); ++note)
     {
@@ -158,22 +130,3 @@ void AudioEngine::update_input(std::set<SDL_Keycode> keys_pressed)
 void AudioEngine::increase_octave() { m_octave += 1; }
 
 void AudioEngine::decrease_octave() { m_octave -= 1; }
-
-Note AudioEngine::key2note(SDL_Keycode key)
-{
-    int index = -1;
-    auto it = std::find(m_possible_keys.begin(), m_possible_keys.end(), key);
-    if (it != m_possible_keys.end())
-    {
-        index = it - m_possible_keys.begin();
-    }
-
-    Note note;
-    if (index != -1)
-    {
-        note.type = (NoteType)index;
-        note.octave = m_octave;
-    }
-
-    return note;
-}

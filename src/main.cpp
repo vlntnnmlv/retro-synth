@@ -2,6 +2,6 @@
 
 int main()
 {
-    App *app = new App();
-    app->start();
+    App app = App();
+    app.start();
 }
