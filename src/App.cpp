@@ -220,6 +220,7 @@ int App::init_shaders()
 
 int App::init_geometry()
 {
+    // part of the screen to render!
     const GLfloat verts[4][4] = {
         //  x      y      s      t
         { -1.0f, -1.0f,  0.0f,  1.0f }, // BL
@@ -345,6 +346,21 @@ void App::poll_event()
             std::cout << "resizing.....\n";
             m_window_width = m_current_event.window.data1;
             m_window_height = m_current_event.window.data2;
+
+            glUseProgram(0);
+            glDisableVertexAttribArray(0);
+            glDetachShader(m_gl_program_id, m_gl_vertex_shader);
+            glDetachShader(m_gl_program_id, m_gl_fragment_shader);
+            glDeleteProgram(m_gl_program_id);
+            glDeleteShader(m_gl_vertex_shader);
+            glDeleteShader(m_gl_fragment_shader);
+            glDeleteTextures(1, &m_gl_tex);
+            glDeleteBuffers(1, &m_gl_ibo);
+            glDeleteBuffers(1, &m_gl_vbo);
+            glDeleteVertexArrays(1, &m_gl_vao);
+            SDL_GL_DeleteContext(m_gl_context);
+
+            init_video();
             // glUniform2f(glGetUniformLocation(m_gl_program_id, "in_Resolution"), m_window_width, m_window_height);
         }
     }
