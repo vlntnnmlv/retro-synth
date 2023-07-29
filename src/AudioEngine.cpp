@@ -70,8 +70,6 @@ void AudioEngine::on_callback(uint8_t* stream, int len)
         for (auto note = m_current_notes.begin(); note != m_current_notes.end(); ++note)
         {
             amplitude = m_envelope.get_amplitude(*note, m_audio_time);
-            // TODO: Wrong condition (amplitude == 0.0)
-            // if if stop perssing key on release phase, it will stil play until release ended.
             if (note->active && note->time_off > note->time_on && amplitude <= 0.0f)
             {
                 note->active = false;
@@ -80,7 +78,7 @@ void AudioEngine::on_callback(uint8_t* stream, int len)
             }
             average_amplitude += amplitude;
 
-            current_freq = m_oscillator.oscillate(note->get_frequency(), m_audio_time, OscilatorType::TRIANGLE);
+            current_freq = m_oscillator.oscillate(note->get_frequency(), m_audio_time, OscilatorType::SAW_ANALOG);
             sound += amplitude * current_freq;
         }
 
@@ -91,8 +89,8 @@ void AudioEngine::on_callback(uint8_t* stream, int len)
         
         m_average_amplitude = average_amplitude;
 
-        fstream[2 * sid + 0] = sound; /* L */
-        fstream[2 * sid + 1] = sound; /* R */
+        fstream[2 * sid + 0] = sound; /* Left  channel */
+        fstream[2 * sid + 1] = sound; /* Right channel */
     }
 
     m_samples_played += (len / 8);
