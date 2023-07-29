@@ -2,14 +2,16 @@
 
 EnvelopeADSR::EnvelopeADSR()
 {
-    attackPeriod = 0.3f;
-    decayPeriod = 0.01f;
-    releasePeriod = 0.07f;
+    attackPeriod = 0.27f;
+    decayPeriod = 0.85f;
+    releasePeriod = 0.4f;
 
     attackAmplitude = 0.7f;
     sustainAmplitude = 0.5f;
 }
 
+
+// TODO: If note is releasing, and pressed again, amplitude should goi up from the current value, not from zero.
 float EnvelopeADSR::get_amplitude(Note note, float time) const
 {
     float amplitude = 0.0f;

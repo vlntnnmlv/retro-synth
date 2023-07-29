@@ -8,7 +8,7 @@
 class Instrument
 {
     public:
-        Instrument(const std::list<OscillatorType> &&oscilators)
+        Instrument(const std::list<std::pair<float, OscillatorType>> &&oscilators)
         {
             m_oscillators = oscilators;
         }
@@ -18,13 +18,13 @@ class Instrument
             float result = 0.0f;
             for (auto osc : m_oscillators)
             {
-                result += m_oscillator.oscillate(note.get_frequency(), time, osc);
+                result += osc.first * m_oscillator.oscillate(note.get_frequency(), time, osc.second);
             }
             return result;
         }
 
     private:
         Oscillator                m_oscillator;
-        std::list<OscillatorType> m_oscillators;
+        std::list<std::pair<float, OscillatorType>> m_oscillators;
 
 };
