@@ -8,6 +8,11 @@
 class Instrument
 {
     public:
+        Instrument()
+        {
+            m_oscillators = std::list<std::pair<float, OscillatorType>>();
+        }
+
         Instrument(const std::list<std::pair<float, OscillatorType>> &&oscilators)
         {
             m_oscillators = oscilators;
