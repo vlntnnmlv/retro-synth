@@ -31,6 +31,6 @@ void main()
     //     out_Color = vec4(c, 1.0);
     // }
 
-    if (abs(wave(uv.x, in_Amplitude) - uv.y) < 0.0)
+    if (abs(wave(uv.x, in_Amplitude) - uv.y) < 0.01)
         out_Color = vec4(in_Amplitude, 0.0, 0.0, 1.0);
 }

@@ -32,11 +32,11 @@ App::App()
 
     m_time = 0;
 
-    m_gl_program_id = 0;
-    m_gl_vertex_pos_2d_location = -1;
-    m_gl_vao = 0;
-    m_gl_vbo = 0;
-    m_gl_ibo = 0;
+    // m_gl_program_id = 0;
+    // m_gl_vertex_pos_2d_location = -1;
+    // m_gl_vao = 0;
+    // m_gl_vbo = 0;
+    // m_gl_ibo = 0;
 
     init();
 }
@@ -160,9 +160,10 @@ int App::init_video()
     }
 
     // Initialize Shaders
-    init_shaders();
-    init_geometry();
-    init_textures();
+    // init_shaders();
+    // init_geometry();
+    // init_textures();
+    m_shader = Shader(&m_audio_engine, m_window, m_window_width, m_window_height);
 
     return 0;
 }
@@ -281,13 +282,14 @@ int App::init_textures()
 void App::render()
 {
     // Set shader uniforms
-    glUniform1f(glGetUniformLocation(m_gl_program_id, "in_Time"), m_audio_engine.get_audio_time());
-    glUniform1f(glGetUniformLocation(m_gl_program_id, "in_Amplitude"), m_audio_engine.get_amplitude());
+    // glUniform1f(glGetUniformLocation(m_gl_program_id, "in_Time"), m_audio_engine.get_audio_time());
+    // glUniform1f(glGetUniformLocation(m_gl_program_id, "in_Amplitude"), m_audio_engine.get_amplitude());
     
-    // Redraw everything
-    glClear(GL_COLOR_BUFFER_BIT);
-    glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, NULL);
-    SDL_GL_SwapWindow(m_window);
+    // // Redraw everything
+    // glClear(GL_COLOR_BUFFER_BIT);
+    // glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, NULL);
+    // SDL_GL_SwapWindow(m_window);
+    m_shader.render();
 }
 
 void App::start()
@@ -361,7 +363,7 @@ void App::poll_event()
             SDL_GL_DeleteContext(m_gl_context);
 
             init_video();
-            // glUniform2f(glGetUniformLocation(m_gl_program_id, "in_Resolution"), m_window_width, m_window_height);
+            glUniform2f(glGetUniformLocation(m_gl_program_id, "in_Resolution"), m_window_width, m_window_height);
         }
     }
 

@@ -10,6 +10,7 @@
 #include <GL/glu.h>
 
 #include "AudioEngine.h"
+#include "Shader.h"
 
 class App
 {
@@ -20,6 +21,8 @@ class App
         void start();
 
     private:
+
+        Shader m_shader;
 
         int init();
         int init_audio();
