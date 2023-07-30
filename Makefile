@@ -15,7 +15,9 @@ INCLUDE                = -I$(SDL2_INCLUDE_DIR) -I$(SDL2_IMAGE_INCLUDE_DIR) -I$(G
 FRAMEWORKS             = -F$(FRAMEWORKS_DIR) -framework OpenGL -framework SDL2 -framework SDL2_image -framework CoreMIDI -framework CoreAudio -framework CoreFoundation 
 LIBRARIES              = -L$(GLEW_LIB_DIR) -L$(GLU_LIB_DIR) -lGLEW -lglu
 
+PREPROCESSOR_DIRECTIVES = -D__MACOSX_CORE__ --std=c++20
+
 NAME                   = retro-synth.app
 
 all:
-	clang++ --std=c++20 -D__MACOSX_CORE__ $(SRC_DIR)*.cpp $(INCLUDE) $(FRAMEWORKS) $(LIBRARIES) -o $(NAME)
+	clang++ $(PREPROCESSOR_DIRECTIVES) $(SRC_DIR)*.cpp $(INCLUDE) $(FRAMEWORKS) $(LIBRARIES) -o $(NAME)
