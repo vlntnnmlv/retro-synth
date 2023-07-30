@@ -11,6 +11,7 @@ Note::Note()
 
 float Note::get_frequency() const
 {
+    // C_0 frequency - https://pages.mtu.edu/~suits/notefreqs.html
     return 16.35f * std::pow(2, octave) * std::pow(2, type / 12.0f); 
 }
 
