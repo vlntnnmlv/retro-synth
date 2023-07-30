@@ -12,6 +12,8 @@
 #include "AudioEngine.h"
 #include "Shader.h"
 
+#include "RtMidi.h"
+
 class App
 {
     public:
@@ -23,6 +25,7 @@ class App
     private:
 
         Shader m_shader;
+        RtMidiIn m_MIDI_in;
 
         int init();
         int init_audio();
@@ -36,7 +39,11 @@ class App
         void poll_event();
         void render();
 
+        bool try_add_input_note(Note note);
+        bool try_remove_input_note(Note note);
+
         Note key2note(SDL_Keycode key);
+        Note midi_key2note(std::vector<unsigned char> midi_key);
 
         SDL_Window*              m_window;
         int                      m_window_width;

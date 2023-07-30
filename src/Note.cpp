@@ -11,7 +11,7 @@ Note::Note()
 
 float Note::get_frequency() const
 {
-    return 27.5f * std::pow(2, octave) * std::pow(2, type / 12.0f); 
+    return 16.35f * std::pow(2, octave) * std::pow(2, type / 12.0f); 
 }
 
 bool Note::operator==(const Note& other) const

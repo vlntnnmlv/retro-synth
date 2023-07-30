@@ -160,10 +160,10 @@ int App::init_video()
     }
 
     // Initialize Shaders
-    // init_shaders();
-    // init_geometry();
-    // init_textures();
-    m_shader = Shader(&m_audio_engine, m_window, m_window_width, m_window_height);
+    init_shaders();
+    init_geometry();
+    init_textures();
+    // m_shader = Shader(&m_audio_engine, m_window, m_window_width, m_window_height);
 
     return 0;
 }
@@ -282,19 +282,26 @@ int App::init_textures()
 void App::render()
 {
     // Set shader uniforms
-    // glUniform1f(glGetUniformLocation(m_gl_program_id, "in_Time"), m_audio_engine.get_audio_time());
-    // glUniform1f(glGetUniformLocation(m_gl_program_id, "in_Amplitude"), m_audio_engine.get_amplitude());
+    glUniform1f(glGetUniformLocation(m_gl_program_id, "in_Time"), m_audio_engine.get_audio_time());
+    glUniform1f(glGetUniformLocation(m_gl_program_id, "in_Amplitude"), m_audio_engine.get_amplitude());
     
-    // // Redraw everything
-    // glClear(GL_COLOR_BUFFER_BIT);
-    // glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, NULL);
-    // SDL_GL_SwapWindow(m_window);
-    m_shader.render();
+    // Redraw everything
+    glClear(GL_COLOR_BUFFER_BIT);
+    glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, NULL);
+    SDL_GL_SwapWindow(m_window);
+    // m_shader.render();
 }
 
 void App::start()
 {
     m_running = true;
+    unsigned int nPorts = m_MIDI_in.getPortCount();
+    if ( nPorts != 0 )
+    {
+        m_MIDI_in.openPort(0);
+        m_MIDI_in.ignoreTypes(false, false, false);
+    }
+
     while (m_running)
     {
         loop();
@@ -304,10 +311,29 @@ void App::start()
 void App::loop()
 {
     Uint64 frame_start_time = SDL_GetPerformanceCounter();
-
+    
     while(SDL_PollEvent(&m_current_event) != 0)
     {
         poll_event();
+    }
+
+
+    std::vector<unsigned char> message;
+    int nBytes, i;
+    double stamp;
+
+    stamp = m_MIDI_in.getMessage(&message);
+    nBytes = message.size();
+    if (nBytes >= 2)
+    {
+        if (message[0] == 156)
+        {
+            try_add_input_note(midi_key2note(message));
+        }
+        if (message[0] == 140)
+        {
+            try_remove_input_note(midi_key2note(message));
+        }
     }
 
     render();
@@ -335,6 +361,18 @@ Note App::key2note(SDL_Keycode key)
 
     return note;
 }
+
+Note App::midi_key2note(std::vector<unsigned char> midi_key)
+{
+    Note note;
+    std::cout << "Note id " << (int)midi_key[1] << "\n";
+    note.type = (NoteType)((int)midi_key[1] % 12);
+    std::cout << "Note type " << note.octave << "\n";
+    note.octave = (int)(midi_key[1] / 12);
+    std::cout << "Note octave " << note.octave << "\n";
+    return note;
+}
+
 
 void App::poll_event()
 {
@@ -387,12 +425,7 @@ void App::poll_event()
         if (it != m_possible_keys.end())
         {
             Note note = key2note(m_current_event.key.keysym.sym);
-            auto it = std::find(m_pressed_notes.begin(), m_pressed_notes.end(), note);
-            if (it == m_pressed_notes.end())
-            {
-                m_pressed_notes.push_back(key2note(m_current_event.key.keysym.sym));
-                m_audio_engine.update_input(m_pressed_notes);
-            }
+            try_add_input_note(note);
         }
     }
     if (m_current_event.type == SDL_KEYUP)
@@ -401,12 +434,31 @@ void App::poll_event()
         if (it != m_possible_keys.end())
         {
             Note note = key2note(m_current_event.key.keysym.sym);
-            auto it = std::find(m_pressed_notes.begin(), m_pressed_notes.end(), note);
-            if (it != m_pressed_notes.end())
-            {
-                m_pressed_notes.erase(it);
-                m_audio_engine.update_input(m_pressed_notes);
-            }
+            try_remove_input_note(note);
         }
     }   
+}
+
+bool App::try_add_input_note(Note note)
+{
+    auto it = std::find(m_pressed_notes.begin(), m_pressed_notes.end(), note);
+    if (it == m_pressed_notes.end())
+    {
+        m_pressed_notes.push_back(note);
+        m_audio_engine.update_input(m_pressed_notes);
+        return true;
+    }
+    return false;
+}
+
+bool App::try_remove_input_note(Note note)
+{
+    auto it = std::find(m_pressed_notes.begin(), m_pressed_notes.end(), note);
+    if (it != m_pressed_notes.end())
+    {
+        m_pressed_notes.erase(it);
+        m_audio_engine.update_input(m_pressed_notes);
+        return true;
+    }
+    return false;
 }
