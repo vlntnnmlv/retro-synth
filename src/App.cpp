@@ -10,8 +10,8 @@ App::App()
     m_pressed_notes = std::list<Note>();
 
     /*
-        | a# | b# |        | d# | e# | f# |
-    |  a  |  b  |  c  |  d  |  e  |  f  |  g  |
+        | c# | d# |        | f# | g# | a# |
+    |  c  |  d  |  e  |  f  |  g  |  a  |  b  |
     */
     m_possible_keys = std::vector<SDL_Keycode>
     {
@@ -30,13 +30,8 @@ App::App()
         SDLK_k
     };
 
+    m_delta_time = 0;
     m_time = 0;
-
-    // m_gl_program_id = 0;
-    // m_gl_vertex_pos_2d_location = -1;
-    // m_gl_vao = 0;
-    // m_gl_vbo = 0;
-    // m_gl_ibo = 0;
 
     init();
 }
@@ -44,17 +39,6 @@ App::App()
 App::~App()
 {
     // Clean shaders
-    glUseProgram(0);
-    glDisableVertexAttribArray(0);
-    glDetachShader(m_gl_program_id, m_gl_vertex_shader);
-    glDetachShader(m_gl_program_id, m_gl_fragment_shader);
-    glDeleteProgram(m_gl_program_id);
-    glDeleteShader(m_gl_vertex_shader);
-    glDeleteShader(m_gl_fragment_shader);
-    glDeleteTextures(1, &m_gl_tex);
-    glDeleteBuffers(1, &m_gl_ibo);
-    glDeleteBuffers(1, &m_gl_vbo);
-    glDeleteVertexArrays(1, &m_gl_vao);
     SDL_GL_DeleteContext(m_gl_context);
 
     // Everything else
@@ -160,121 +144,7 @@ int App::init_video()
     }
 
     // Initialize Shaders
-    init_shaders();
-    init_geometry();
-    init_textures();
-    // m_shader = Shader(&m_audio_engine, m_window, m_window_width, m_window_height);
-
-    return 0;
-}
-
-int App::init_shaders()
-{
-    GLint status;
-    char err_buf[512];
-
-    glGenVertexArrays(1, &m_gl_vao);
-    glBindVertexArray(m_gl_vao);
-
-    // Compile vertex shader
-    m_gl_vertex_shader_content = read_file("shader/vertex.glsl");
-    const char *vertex_shader_source = m_gl_vertex_shader_content->c_str();
-
-    m_gl_vertex_shader = glCreateShader(GL_VERTEX_SHADER);
-    glShaderSource(m_gl_vertex_shader, 1, &vertex_shader_source, NULL);
-    glCompileShader(m_gl_vertex_shader);
-    glGetShaderiv(m_gl_vertex_shader, GL_COMPILE_STATUS, &status);
-    if (status != GL_TRUE) {
-        glGetShaderInfoLog(m_gl_vertex_shader, sizeof(err_buf), NULL, err_buf);
-        err_buf[sizeof(err_buf)-1] = '\0';
-        fprintf(stderr, "Vertex shader compilation failed: %s\n", err_buf);
-        return 1;
-    }
-
-    // Compile fragment shader
-    m_gl_fragment_shader_content = read_file("shader/fragment.glsl");
-    const char *fragment_shader_source = m_gl_fragment_shader_content->c_str();
-
-    m_gl_fragment_shader = glCreateShader(GL_FRAGMENT_SHADER);
-    glShaderSource(m_gl_fragment_shader, 1, &fragment_shader_source, NULL);
-    glCompileShader(m_gl_fragment_shader);
-    glGetShaderiv(m_gl_fragment_shader, GL_COMPILE_STATUS, &status);
-    if (status != GL_TRUE) {
-        glGetShaderInfoLog(m_gl_fragment_shader, sizeof(err_buf), NULL, err_buf);
-        err_buf[sizeof(err_buf)-1] = '\0';
-        fprintf(stderr, "Fragment shader compilation failed: %s\n", err_buf);
-        return 1;
-    }
-
-    // Link vertex and fragment shaders
-    m_gl_program_id = glCreateProgram();
-    glAttachShader(m_gl_program_id, m_gl_vertex_shader);
-    glAttachShader(m_gl_program_id, m_gl_fragment_shader);
-    glBindFragDataLocation(m_gl_program_id, 0, "out_Color");
-    glLinkProgram(m_gl_program_id);
-    glUseProgram(m_gl_program_id);
-
-    glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
-
-    return 0;
-}
-
-int App::init_geometry()
-{
-    // part of the screen to render!
-    const GLfloat verts[4][4] = {
-        //  x      y      s      t
-        { -1.0f, -1.0f,  0.0f,  1.0f }, // BL
-        { -1.0f,  1.0f,  0.0f,  0.0f }, // TL
-        {  1.0f,  1.0f,  1.0f,  0.0f }, // TR
-        {  1.0f, -1.0f,  1.0f,  1.0f }, // BR
-    };
-
-    // Populate vertex buffer
-    glGenBuffers(1, &m_gl_vbo);
-    glBindBuffer(GL_ARRAY_BUFFER, m_gl_vbo);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(verts), verts, GL_STATIC_DRAW);
-
-    const GLint indicies[] = {
-        0, 1, 2, 0, 2, 3
-    };
-
-    // Populate element buffer
-    glGenBuffers(1, &m_gl_ibo);
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_gl_ibo);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indicies), indicies, GL_STATIC_DRAW);
-
-    // Bind vertex position attribute
-    GLint pos_attr_loc = glGetAttribLocation(m_gl_program_id, "in_Position");
-    glVertexAttribPointer(pos_attr_loc, 2, GL_FLOAT, GL_FALSE, 4*sizeof(GLfloat), (void*)0);
-    glEnableVertexAttribArray(pos_attr_loc);
-
-    // Bind vertex texture coordinate attribute
-    GLint tex_attr_loc = glGetAttribLocation(m_gl_program_id, "in_Texcoord");
-    glVertexAttribPointer(tex_attr_loc, 2, GL_FLOAT, GL_FALSE, 4*sizeof(GLfloat), (void*)(2*sizeof(GLfloat)));
-    glEnableVertexAttribArray(tex_attr_loc);
-
-    glUniform2f(glGetUniformLocation(m_gl_program_id, "in_Resolution"), m_window_width, m_window_height);
-    glUniform1f(glGetUniformLocation(m_gl_program_id, "in_Time"), m_audio_engine.get_audio_time());
-    glUniform1f(glGetUniformLocation(m_gl_program_id, "in_Amplitude"), m_audio_engine.get_amplitude());
-
-    return 0;
-}
-
-int App::init_textures()
-{
-    // glGenTextures(1, &m_gl_tex);
-    // glActiveTexture(GL_TEXTURE0);
-    // glBindTexture(GL_TEXTURE_2D, m_gl_tex);
-    // glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, 256, 256, 0, GL_RGB, GL_UNSIGNED_BYTE, NULL);
-    // glUniform1i(glGetUniformLocation(m_gl_program_id, "tex"), 0);
-    // glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S,     GL_CLAMP_TO_BORDER);
-    // glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T,     GL_CLAMP_TO_BORDER);
-    // glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    // glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    // glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, 256, 256, GL_RGBA, GL_UNSIGNED_INT_8_8_8_8_REV, NULL);
-    // glEnable(GL_BLEND);
-    // glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    m_shader_unit = ShaderUnit(&m_audio_engine, m_window, m_window_width, m_window_height);
 
     return 0;
 }
@@ -282,14 +152,15 @@ int App::init_textures()
 void App::render()
 {
     // Set shader uniforms
-    glUniform1f(glGetUniformLocation(m_gl_program_id, "in_Time"), m_audio_engine.get_audio_time());
-    glUniform1f(glGetUniformLocation(m_gl_program_id, "in_Amplitude"), m_audio_engine.get_amplitude());
+    // glUniform1f(glGetUniformLocation(m_gl_program_id, "in_Time"), m_audio_engine.get_audio_time());
+    // glUniform1f(glGetUniformLocation(m_gl_program_id, "in_Amplitude"), m_audio_engine.get_amplitude());
     
-    // Redraw everything
-    glClear(GL_COLOR_BUFFER_BIT);
-    glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, NULL);
-    SDL_GL_SwapWindow(m_window);
-    // m_shader.render();
+    // // Redraw everything
+    // glClear(GL_COLOR_BUFFER_BIT);
+    // glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, NULL);
+    // SDL_GL_SwapWindow(m_window);
+
+    m_shader_unit.render();
 }
 
 void App::start()
@@ -387,21 +258,21 @@ void App::poll_event()
             m_window_width = m_current_event.window.data1;
             m_window_height = m_current_event.window.data2;
 
-            glUseProgram(0);
-            glDisableVertexAttribArray(0);
-            glDetachShader(m_gl_program_id, m_gl_vertex_shader);
-            glDetachShader(m_gl_program_id, m_gl_fragment_shader);
-            glDeleteProgram(m_gl_program_id);
-            glDeleteShader(m_gl_vertex_shader);
-            glDeleteShader(m_gl_fragment_shader);
-            glDeleteTextures(1, &m_gl_tex);
-            glDeleteBuffers(1, &m_gl_ibo);
-            glDeleteBuffers(1, &m_gl_vbo);
-            glDeleteVertexArrays(1, &m_gl_vao);
-            SDL_GL_DeleteContext(m_gl_context);
+            // glUseProgram(0);
+            // glDisableVertexAttribArray(0);
+            // glDetachShader(m_gl_program_id, m_gl_vertex_shader);
+            // glDetachShader(m_gl_program_id, m_gl_fragment_shader);
+            // glDeleteProgram(m_gl_program_id);
+            // glDeleteShader(m_gl_vertex_shader);
+            // glDeleteShader(m_gl_fragment_shader);
+            // glDeleteTextures(1, &m_gl_tex);
+            // glDeleteBuffers(1, &m_gl_ibo);
+            // glDeleteBuffers(1, &m_gl_vbo);
+            // glDeleteVertexArrays(1, &m_gl_vao);
+            // SDL_GL_DeleteContext(m_gl_context);
 
-            init_video();
-            glUniform2f(glGetUniformLocation(m_gl_program_id, "in_Resolution"), m_window_width, m_window_height);
+            // init_video();
+            // glUniform2f(glGetUniformLocation(m_gl_program_id, "in_Resolution"), m_window_width, m_window_height);
         }
     }
 

@@ -1,8 +1,8 @@
-#include "Shader.h"
+#include "ShaderUnit.h"
 
-Shader::Shader() {};
+ShaderUnit::ShaderUnit() {};
 
-Shader::Shader(AudioEngine *audio_engine, SDL_Window *window, float screen_width, float screen_height):
+ShaderUnit::ShaderUnit(AudioEngine *audio_engine, SDL_Window *window, float window_width, float window_height):
     m_audio_engine(audio_engine),
     m_window(window)
 {
@@ -12,6 +12,28 @@ Shader::Shader(AudioEngine *audio_engine, SDL_Window *window, float screen_width
     m_gl_vbo = 0;
     m_gl_ibo = 0;
 
+    init_shaders();
+    init_geometry(window_width, window_height);
+    init_textures();
+}
+
+ShaderUnit::~ShaderUnit()
+{
+    glUseProgram(0);
+    glDisableVertexAttribArray(0);
+    glDetachShader(m_gl_program_id, m_gl_vertex_shader);
+    glDetachShader(m_gl_program_id, m_gl_fragment_shader);
+    glDeleteProgram(m_gl_program_id);
+    glDeleteShader(m_gl_vertex_shader);
+    glDeleteShader(m_gl_fragment_shader);
+    glDeleteTextures(1, &m_gl_tex);
+    glDeleteBuffers(1, &m_gl_ibo);
+    glDeleteBuffers(1, &m_gl_vbo);
+    glDeleteVertexArrays(1, &m_gl_vao);
+}
+
+void ShaderUnit::init_shaders()
+{
     GLint status;
     char err_buf[512];
 
@@ -55,9 +77,10 @@ Shader::Shader(AudioEngine *audio_engine, SDL_Window *window, float screen_width
     glUseProgram(m_gl_program_id);
 
     glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
+}
 
-    //////////////
-
+void ShaderUnit::init_geometry(float window_width, float window_height)
+{
     // part of the screen to render!
     const GLfloat verts[4][4] = {
         //  x      y      s      t
@@ -91,28 +114,17 @@ Shader::Shader(AudioEngine *audio_engine, SDL_Window *window, float screen_width
     glVertexAttribPointer(tex_attr_loc, 2, GL_FLOAT, GL_FALSE, 4*sizeof(GLfloat), (void*)(2*sizeof(GLfloat)));
     glEnableVertexAttribArray(tex_attr_loc);
 
-    glUniform2f(glGetUniformLocation(m_gl_program_id, "in_Resolution"), screen_width, screen_height);
-    glUniform1f(glGetUniformLocation(m_gl_program_id, "in_Time"), audio_engine->get_audio_time());
-    glUniform1f(glGetUniformLocation(m_gl_program_id, "in_Amplitude"), audio_engine->get_amplitude());
+    glUniform2f(glGetUniformLocation(m_gl_program_id, "in_Resolution"), window_width, window_height);
+    glUniform1f(glGetUniformLocation(m_gl_program_id, "in_Time"), m_audio_engine->get_audio_time());
+    glUniform1f(glGetUniformLocation(m_gl_program_id, "in_Amplitude"), m_audio_engine->get_amplitude());
 }
 
-Shader::~Shader()
+void ShaderUnit::init_textures()
 {
-    glUseProgram(0);
-    glDisableVertexAttribArray(0);
-    glDetachShader(m_gl_program_id, m_gl_vertex_shader);
-    glDetachShader(m_gl_program_id, m_gl_fragment_shader);
-    glDeleteProgram(m_gl_program_id);
-    glDeleteShader(m_gl_vertex_shader);
-    glDeleteShader(m_gl_fragment_shader);
-    glDeleteTextures(1, &m_gl_tex);
-    glDeleteBuffers(1, &m_gl_ibo);
-    glDeleteBuffers(1, &m_gl_vbo);
-    glDeleteVertexArrays(1, &m_gl_vao);
-    // SDL_GL_DeleteContext(m_gl_context);
+
 }
 
-void Shader::render()
+void ShaderUnit::render()
 {
     glUniform1f(glGetUniformLocation(m_gl_program_id, "in_Time"), m_audio_engine->get_audio_time());
     glUniform1f(glGetUniformLocation(m_gl_program_id, "in_Amplitude"), m_audio_engine->get_amplitude());
@@ -123,7 +135,7 @@ void Shader::render()
     SDL_GL_SwapWindow(m_window);
 }
 
-GLuint Shader::get_program_id()
+GLuint ShaderUnit::get_program_id()
 {
     return m_gl_program_id;
 }

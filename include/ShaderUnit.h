@@ -10,14 +10,18 @@
 #include "AudioEngine.h"
 #include <iostream>
 
-class Shader
+class ShaderUnit
 {
     public:
-        Shader();
-        Shader(AudioEngine *audio_engine, SDL_Window *window, float screen_width, float screen_height);
-        ~Shader();
+        ShaderUnit();
+        ShaderUnit(AudioEngine *audio_engine, SDL_Window *window, float screen_width, float screen_height);
+        ~ShaderUnit();
 
+        void   init_shaders();
+        void   init_geometry(float window_width, float window_height);
+        void   init_textures();
         void   render();
+
         GLuint get_program_id();
 
     private:
@@ -36,5 +40,4 @@ class Shader
         GLuint                   m_gl_vbo;
         GLuint                   m_gl_ibo;
         GLuint                   m_gl_tex;
-
 }; 

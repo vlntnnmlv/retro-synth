@@ -40,31 +40,33 @@
 #include "RtMidi.h"
 #include <sstream>
 
-#if (TARGET_OS_IPHONE == 1)
+#ifdef TARGET_OS_IPHONE
+  #if (TARGET_OS_IPHONE == 1)
 
-    #define AudioGetCurrentHostTime CAHostTimeBase::GetCurrentTime
-    #define AudioConvertHostTimeToNanos CAHostTimeBase::ConvertToNanos
+      #define AudioGetCurrentHostTime CAHostTimeBase::GetCurrentTime
+      #define AudioConvertHostTimeToNanos CAHostTimeBase::ConvertToNanos
 
-    #include <mach/mach_time.h>
-    class CTime2nsFactor
-    {
-    public:
-        CTime2nsFactor()
-        {
-            mach_timebase_info_data_t tinfo;
-            mach_timebase_info(&tinfo);
-            Factor = (double)tinfo.numer / tinfo.denom;
-        }
-        static double Factor;
-    };
-    double CTime2nsFactor::Factor;
-    static CTime2nsFactor InitTime2nsFactor;
-    #undef AudioGetCurrentHostTime
-    #undef AudioConvertHostTimeToNanos
-  #define AudioGetCurrentHostTime (uint64_t) mach_absolute_time
-  #define AudioConvertHostTimeToNanos(t) t *CTime2nsFactor::Factor
-  #define EndianS32_BtoN(n) n
+      #include <mach/mach_time.h>
+      class CTime2nsFactor
+      {
+      public:
+          CTime2nsFactor()
+          {
+              mach_timebase_info_data_t tinfo;
+              mach_timebase_info(&tinfo);
+              Factor = (double)tinfo.numer / tinfo.denom;
+          }
+          static double Factor;
+      };
+      double CTime2nsFactor::Factor;
+      static CTime2nsFactor InitTime2nsFactor;
+      #undef AudioGetCurrentHostTime
+      #undef AudioConvertHostTimeToNanos
+    #define AudioGetCurrentHostTime (uint64_t) mach_absolute_time
+    #define AudioConvertHostTimeToNanos(t) t *CTime2nsFactor::Factor
+    #define EndianS32_BtoN(n) n
 
+  #endif
 #endif
 
 // Default for Windows is to add an identifier to the port names; this
