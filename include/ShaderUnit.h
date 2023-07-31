@@ -22,8 +22,6 @@ class ShaderUnit
         void   init_textures();
         void   render();
 
-        GLuint get_program_id();
-
     private:
         AudioEngine              *m_audio_engine;
         SDL_Window               *m_window;

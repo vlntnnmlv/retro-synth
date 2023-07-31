@@ -144,23 +144,14 @@ int App::init_video()
     }
 
     // Initialize Shaders
-    m_shader_unit = ShaderUnit(&m_audio_engine, m_window, m_window_width, m_window_height);
+    m_shader_unit = new ShaderUnit(&m_audio_engine, m_window, m_window_width, m_window_height);
 
     return 0;
 }
 
 void App::render()
 {
-    // Set shader uniforms
-    // glUniform1f(glGetUniformLocation(m_gl_program_id, "in_Time"), m_audio_engine.get_audio_time());
-    // glUniform1f(glGetUniformLocation(m_gl_program_id, "in_Amplitude"), m_audio_engine.get_amplitude());
-    
-    // // Redraw everything
-    // glClear(GL_COLOR_BUFFER_BIT);
-    // glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, NULL);
-    // SDL_GL_SwapWindow(m_window);
-
-    m_shader_unit.render();
+    m_shader_unit->render();
 }
 
 void App::start()
@@ -187,7 +178,6 @@ void App::loop()
     {
         poll_event();
     }
-
 
     std::vector<unsigned char> message;
     int nBytes, i;
@@ -276,7 +266,6 @@ void App::poll_event()
         }
     }
 
-    // TODO: Add MIDI input - http://www.music.mcgill.ca/~gary/rtmidi/index.html#license
     if (m_current_event.type == SDL_KEYDOWN)
     {
         if (m_current_event.key.keysym.sym == SDLK_ESCAPE)

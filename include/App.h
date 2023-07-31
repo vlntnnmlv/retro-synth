@@ -24,7 +24,7 @@ class App
 
     private:
 
-        ShaderUnit m_shader_unit;
+        ShaderUnit *m_shader_unit;
         RtMidiIn m_MIDI_in;
 
         int init();

@@ -30,6 +30,7 @@ ShaderUnit::~ShaderUnit()
     glDeleteBuffers(1, &m_gl_ibo);
     glDeleteBuffers(1, &m_gl_vbo);
     glDeleteVertexArrays(1, &m_gl_vao);
+    std::cout << "Shader closed\n";
 }
 
 void ShaderUnit::init_shaders()
@@ -133,9 +134,4 @@ void ShaderUnit::render()
     glClear(GL_COLOR_BUFFER_BIT);
     glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, NULL);
     SDL_GL_SwapWindow(m_window);
-}
-
-GLuint ShaderUnit::get_program_id()
-{
-    return m_gl_program_id;
 }
