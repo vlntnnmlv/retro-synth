@@ -30,7 +30,6 @@ ShaderUnit::~ShaderUnit()
     glDeleteBuffers(1, &m_gl_ibo);
     glDeleteBuffers(1, &m_gl_vbo);
     glDeleteVertexArrays(1, &m_gl_vao);
-    std::cout << "Shader closed\n";
 }
 
 void ShaderUnit::init_shaders()
