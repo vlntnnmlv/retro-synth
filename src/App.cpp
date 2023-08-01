@@ -144,14 +144,20 @@ int App::init_video()
     }
 
     // Initialize Shaders
-    m_shader_unit = new ShaderUnit(&m_audio_engine, m_window, m_window_width, m_window_height);
+    m_shader_unit = new ShaderUnit(m_window_width, m_window_height);
 
     return 0;
 }
 
 void App::render()
 {
-    m_shader_unit->render();
+    m_shader_unit->m_setter.set_1f("in_Time", m_audio_engine.get_audio_time());
+    m_shader_unit->m_setter.set_1f("in_Amplitude", m_audio_engine.get_amplitude());
+
+    // Redraw everything
+    glClear(GL_COLOR_BUFFER_BIT);
+    glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, NULL);
+    SDL_GL_SwapWindow(m_window);
 }
 
 void App::start()

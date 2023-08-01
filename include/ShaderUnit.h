@@ -8,24 +8,22 @@
 
 #include "Utility.h"
 #include "AudioEngine.h"
-#include <iostream>
+#include "ShaderParameterSetter.h"
 
 class ShaderUnit
 {
     public:
         ShaderUnit();
-        ShaderUnit(AudioEngine *audio_engine, SDL_Window *window, float screen_width, float screen_height);
+        ShaderUnit(float screen_width, float screen_height);
         ~ShaderUnit();
 
         void   init_shaders();
         void   init_geometry(float window_width, float window_height);
         void   init_textures();
-        void   render();
+
+        ShaderParameterSetter m_setter;
 
     private:
-        AudioEngine              *m_audio_engine;
-        SDL_Window               *m_window;
-
         std::string              *m_gl_vertex_shader_content;
         std::string              *m_gl_fragment_shader_content;
 

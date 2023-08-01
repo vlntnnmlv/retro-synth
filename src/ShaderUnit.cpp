@@ -2,9 +2,7 @@
 
 ShaderUnit::ShaderUnit() {};
 
-ShaderUnit::ShaderUnit(AudioEngine *audio_engine, SDL_Window *window, float window_width, float window_height):
-    m_audio_engine(audio_engine),
-    m_window(window)
+ShaderUnit::ShaderUnit(float window_width, float window_height)
 {
     m_gl_program_id = 0;
     m_gl_vertex_pos_2d_location = -1;
@@ -15,6 +13,9 @@ ShaderUnit::ShaderUnit(AudioEngine *audio_engine, SDL_Window *window, float wind
     init_shaders();
     init_geometry(window_width, window_height);
     init_textures();
+
+    m_setter = ShaderParameterSetter(m_gl_program_id);
+    m_setter.set_2f("in_Resolution", window_width, window_height);
 }
 
 ShaderUnit::~ShaderUnit()
@@ -113,24 +114,9 @@ void ShaderUnit::init_geometry(float window_width, float window_height)
     GLint tex_attr_loc = glGetAttribLocation(m_gl_program_id, "in_Texcoord");
     glVertexAttribPointer(tex_attr_loc, 2, GL_FLOAT, GL_FALSE, 4*sizeof(GLfloat), (void*)(2*sizeof(GLfloat)));
     glEnableVertexAttribArray(tex_attr_loc);
-
-    glUniform2f(glGetUniformLocation(m_gl_program_id, "in_Resolution"), window_width, window_height);
-    glUniform1f(glGetUniformLocation(m_gl_program_id, "in_Time"), m_audio_engine->get_audio_time());
-    glUniform1f(glGetUniformLocation(m_gl_program_id, "in_Amplitude"), m_audio_engine->get_amplitude());
 }
 
 void ShaderUnit::init_textures()
 {
 
-}
-
-void ShaderUnit::render()
-{
-    glUniform1f(glGetUniformLocation(m_gl_program_id, "in_Time"), m_audio_engine->get_audio_time());
-    glUniform1f(glGetUniformLocation(m_gl_program_id, "in_Amplitude"), m_audio_engine->get_amplitude());
-    
-    // Redraw everything
-    glClear(GL_COLOR_BUFFER_BIT);
-    glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, NULL);
-    SDL_GL_SwapWindow(m_window);
 }

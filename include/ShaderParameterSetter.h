@@ -10,6 +10,7 @@ class ShaderParameterSetter
         GLuint m_gl_program_id;
 
     public:
+        ShaderParameterSetter();
         ShaderParameterSetter(GLuint programm_id);
         ~ShaderParameterSetter();
   

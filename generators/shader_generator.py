@@ -15,6 +15,7 @@ class %(name)s
         GLuint m_gl_program_id;
 
     public:
+        %(name)s();
         %(name)s(GLuint programm_id);
         ~%(name)s();
 """ % {"name" : CLASS_NAME }
@@ -28,6 +29,11 @@ setter_function_definition_template = Template( \
 SRC_CONTENT = \
 """#include "%(name)s.h"
 
+%(name)s::%(name)s()
+{
+
+}
+
 %(name)s::%(name)s(GLuint programm_id) : m_gl_program_id(programm_id)
 {
 
@@ -39,11 +45,16 @@ SRC_CONTENT = \
 }
 """ % {"name" : CLASS_NAME }
 
+
+# TODO: pointer setters shoulbe be written other way
+# now, it thinks that you can pas array only of 1 to 4 values,
+# but @(params amount) can actualy be as big as you want,
+# and array will contain @(params amount) element of @(value_format)
 setter_function_template = Template( \
 """
 void %(name)s::set_$value_format(const char *parameter_name, $parameter_names_with_types)
 {
-    glUniform$value_format(glGetUniformLocation(m_gl_program_id,parameter_name), $params_amount$parameter_values);
+    glUniform$value_format(glGetUniformLocation(m_gl_program_id, parameter_name), $params_amount$parameter_values);
 }\n
 """ % {"name" : CLASS_NAME } \
 )
