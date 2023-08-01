@@ -13,10 +13,7 @@ AudioEngine::AudioEngine()
     m_envelope = EnvelopeADSR();
     m_instrument = Instrument(std::list<std::pair<float, OscillatorType>>
         {
-            std::pair<float, OscillatorType> { 0.1f, OscillatorType::SQUARE },
-            std::pair<float, OscillatorType> { 0.3f, OscillatorType::SAW_ANALOG },
-            std::pair<float, OscillatorType> { 0.05f, OscillatorType::NOISE },
-            std::pair<float, OscillatorType> { 0.25f, OscillatorType::SINUS }
+            std::pair<float, OscillatorType> { 0.3f, OscillatorType::SAW_ANALOG }
         }
     );
 }

@@ -4,7 +4,7 @@ EnvelopeADSR::EnvelopeADSR()
 {
     attackPeriod = 0.05f;
     decayPeriod = 0.1f;
-    releasePeriod = 0.15f;
+    releasePeriod = 0.25f;
 
     attackAmplitude = 0.7f;
     sustainAmplitude = 0.5f;
