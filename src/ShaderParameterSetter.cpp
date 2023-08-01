@@ -87,74 +87,74 @@ void ShaderParameterSetter::set_4ui(const char *parameter_name, GLuint ui1, GLui
 }
 
   
-void ShaderParameterSetter::set_1fv(const char *parameter_name, const GLfloat *fv1)
+void ShaderParameterSetter::set_1fv(const char *parameter_name, int count, const GLfloat *fv1)
 {
-    glUniform1fv(glGetUniformLocation(m_gl_program_id, parameter_name), 1, fv1);
+    glUniform1fv(glGetUniformLocation(m_gl_program_id, parameter_name), count, fv1);
 }
 
   
-void ShaderParameterSetter::set_2fv(const char *parameter_name, const GLfloat *fv2)
+void ShaderParameterSetter::set_2fv(const char *parameter_name, int count, const GLfloat *fv2)
 {
-    glUniform2fv(glGetUniformLocation(m_gl_program_id, parameter_name), 2, fv2);
+    glUniform2fv(glGetUniformLocation(m_gl_program_id, parameter_name), count, fv2);
 }
 
   
-void ShaderParameterSetter::set_3fv(const char *parameter_name, const GLfloat *fv3)
+void ShaderParameterSetter::set_3fv(const char *parameter_name, int count, const GLfloat *fv3)
 {
-    glUniform3fv(glGetUniformLocation(m_gl_program_id, parameter_name), 3, fv3);
+    glUniform3fv(glGetUniformLocation(m_gl_program_id, parameter_name), count, fv3);
 }
 
   
-void ShaderParameterSetter::set_4fv(const char *parameter_name, const GLfloat *fv4)
+void ShaderParameterSetter::set_4fv(const char *parameter_name, int count, const GLfloat *fv4)
 {
-    glUniform4fv(glGetUniformLocation(m_gl_program_id, parameter_name), 4, fv4);
+    glUniform4fv(glGetUniformLocation(m_gl_program_id, parameter_name), count, fv4);
 }
 
   
-void ShaderParameterSetter::set_1iv(const char *parameter_name, const GLint *iv1)
+void ShaderParameterSetter::set_1iv(const char *parameter_name, int count, const GLint *iv1)
 {
-    glUniform1iv(glGetUniformLocation(m_gl_program_id, parameter_name), 1, iv1);
+    glUniform1iv(glGetUniformLocation(m_gl_program_id, parameter_name), count, iv1);
 }
 
   
-void ShaderParameterSetter::set_2iv(const char *parameter_name, const GLint *iv2)
+void ShaderParameterSetter::set_2iv(const char *parameter_name, int count, const GLint *iv2)
 {
-    glUniform2iv(glGetUniformLocation(m_gl_program_id, parameter_name), 2, iv2);
+    glUniform2iv(glGetUniformLocation(m_gl_program_id, parameter_name), count, iv2);
 }
 
   
-void ShaderParameterSetter::set_3iv(const char *parameter_name, const GLint *iv3)
+void ShaderParameterSetter::set_3iv(const char *parameter_name, int count, const GLint *iv3)
 {
-    glUniform3iv(glGetUniformLocation(m_gl_program_id, parameter_name), 3, iv3);
+    glUniform3iv(glGetUniformLocation(m_gl_program_id, parameter_name), count, iv3);
 }
 
   
-void ShaderParameterSetter::set_4iv(const char *parameter_name, const GLint *iv4)
+void ShaderParameterSetter::set_4iv(const char *parameter_name, int count, const GLint *iv4)
 {
-    glUniform4iv(glGetUniformLocation(m_gl_program_id, parameter_name), 4, iv4);
+    glUniform4iv(glGetUniformLocation(m_gl_program_id, parameter_name), count, iv4);
 }
 
   
-void ShaderParameterSetter::set_1uiv(const char *parameter_name, const GLuint *uiv1)
+void ShaderParameterSetter::set_1uiv(const char *parameter_name, int count, const GLuint *uiv1)
 {
-    glUniform1uiv(glGetUniformLocation(m_gl_program_id, parameter_name), 1, uiv1);
+    glUniform1uiv(glGetUniformLocation(m_gl_program_id, parameter_name), count, uiv1);
 }
 
   
-void ShaderParameterSetter::set_2uiv(const char *parameter_name, const GLuint *uiv2)
+void ShaderParameterSetter::set_2uiv(const char *parameter_name, int count, const GLuint *uiv2)
 {
-    glUniform2uiv(glGetUniformLocation(m_gl_program_id, parameter_name), 2, uiv2);
+    glUniform2uiv(glGetUniformLocation(m_gl_program_id, parameter_name), count, uiv2);
 }
 
   
-void ShaderParameterSetter::set_3uiv(const char *parameter_name, const GLuint *uiv3)
+void ShaderParameterSetter::set_3uiv(const char *parameter_name, int count, const GLuint *uiv3)
 {
-    glUniform3uiv(glGetUniformLocation(m_gl_program_id, parameter_name), 3, uiv3);
+    glUniform3uiv(glGetUniformLocation(m_gl_program_id, parameter_name), count, uiv3);
 }
 
   
-void ShaderParameterSetter::set_4uiv(const char *parameter_name, const GLuint *uiv4)
+void ShaderParameterSetter::set_4uiv(const char *parameter_name, int count, const GLuint *uiv4)
 {
-    glUniform4uiv(glGetUniformLocation(m_gl_program_id, parameter_name), 4, uiv4);
+    glUniform4uiv(glGetUniformLocation(m_gl_program_id, parameter_name), count, uiv4);
 }
 

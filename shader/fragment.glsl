@@ -2,10 +2,14 @@
 
 in vec2 Texcoord;
 
+#define SOUND_DATA_SIZE 32
+
 uniform sampler2D tex;
 uniform float in_Time;
 uniform float in_Amplitude;
 uniform vec2  in_Resolution;
+
+uniform float[SOUND_DATA_SIZE] in_SoundData;
 
 out vec4 out_Color;
 
@@ -22,6 +26,9 @@ void main()
     uv -= 0.5 * in_Resolution / in_Resolution.y;
     // uv.x *= 5.0;
     uv.y *= 2.0;
+
+    float uvx_width = in_Resolution.x / in_Resolution.y;
+
     
     out_Color = vec4(0.88, 0.88, 0.88, 1.0);
 
@@ -31,6 +38,13 @@ void main()
     //     out_Color = vec4(c, 1.0);
     // }
 
-    if (abs(wave(uv.x, in_Amplitude) - uv.y) < 0.01)
-        out_Color = vec4(in_Amplitude, 0.0, 0.0, 1.0);
+    for (float i = -0.5 * uvx_width; i < 0.5 * uvx_width; i += 0.1)
+    {
+        int index = int(SOUND_DATA_SIZE * i);
+        if (uv.y <= in_SoundData[index])
+            out_Color = vec4(in_Amplitude, 0.0, 0.0, 1.0);
+    }
+
+    // if (abs(wave(uv.x, in_Amplitude) - uv.y) < 0.01)
+    //     out_Color = vec4(in_Amplitude, 0.0, 0.0, 1.0);
 }

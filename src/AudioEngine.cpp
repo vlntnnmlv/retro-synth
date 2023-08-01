@@ -18,6 +18,11 @@ AudioEngine::AudioEngine()
     );
 }
 
+AudioEngine::~AudioEngine()
+{
+    // TODO
+}
+
 float AudioEngine::get_audio_time()
 {
     return m_audio_time;
@@ -38,11 +43,17 @@ int AudioEngine::get_octave()
     return m_octave;
 }
 
+std::pair<int, const float*> AudioEngine::get_sound_data()
+{
+    return m_sound_data;
+}
+
+
 void AudioEngine::on_callback(uint8_t* stream, int len)
 {
     float *fstream = (float*)(stream);
-
-    for (int sid = 0; sid < (len / 8); ++sid)
+    int sid = 0;
+    for (; sid < (len / 8); ++sid)
     {
         m_audio_time = (m_samples_played + sid) / 44100.0;
 
@@ -79,8 +90,12 @@ void AudioEngine::on_callback(uint8_t* stream, int len)
 
         fstream[2 * sid + 0] = sound; /* Left  channel */
         fstream[2 * sid + 1] = sound; /* Right channel */
+
     }
 
+    // TODO: Find a better way to repsent wave data for shader
+    m_sound_data = std::pair<int, const float *>(sid, fstream);
+    
     m_samples_played += (len / 8);
 
     auto note = m_current_notes.begin();

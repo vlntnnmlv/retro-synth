@@ -22,7 +22,7 @@ class %(name)s
 
 setter_function_definition_template = Template( \
 """
-        void set_$value_format(const char *parameter_name, $parameter_names_with_types);
+        void set_$value_format(const char *parameter_name, $params_amount_parameter$parameter_names_with_types);
 """ \
 )
 
@@ -52,7 +52,7 @@ SRC_CONTENT = \
 # and array will contain @(params amount) element of @(value_format)
 setter_function_template = Template( \
 """
-void %(name)s::set_$value_format(const char *parameter_name, $parameter_names_with_types)
+void %(name)s::set_$value_format(const char *parameter_name, $params_amount_parameter$parameter_names_with_types)
 {
     glUniform$value_format(glGetUniformLocation(m_gl_program_id, parameter_name), $params_amount$parameter_values);
 }\n
@@ -86,7 +86,8 @@ def generate_types_data():
                "value_format"                : f"{n}{dt}",
                "parameter_names_with_types"  : ", ".join([f"{data_type_to_type_prefix(dt)}{dt}{i}" for i in range(1, n + 1)]),
                "parameter_values"            : ", ".join([f"{dt}{i}" for i in range(1, n + 1)]),
-               "params_amount"               : ""
+               "params_amount"               : "",
+               "params_amount_parameter"     : ""
            }
 
     for dt in data_pointer_types:
@@ -95,7 +96,8 @@ def generate_types_data():
                "value_format"                : f"{n}{dt}",
                "parameter_names_with_types"  : f"{data_type_to_type_prefix(dt)}{dt}{n}",
                "parameter_values"            : f"{dt}{n}",
-               "params_amount"               : f"{n}, "
+               "params_amount"               : "count, ",
+               "params_amount_parameter"     : "int count, "
            }
 
     return data

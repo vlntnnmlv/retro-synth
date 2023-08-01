@@ -38,27 +38,27 @@ class ShaderParameterSetter
   
         void set_4ui(const char *parameter_name, GLuint ui1, GLuint ui2, GLuint ui3, GLuint ui4);
   
-        void set_1fv(const char *parameter_name, const GLfloat *fv1);
+        void set_1fv(const char *parameter_name, int count, const GLfloat *fv1);
   
-        void set_2fv(const char *parameter_name, const GLfloat *fv2);
+        void set_2fv(const char *parameter_name, int count, const GLfloat *fv2);
   
-        void set_3fv(const char *parameter_name, const GLfloat *fv3);
+        void set_3fv(const char *parameter_name, int count, const GLfloat *fv3);
   
-        void set_4fv(const char *parameter_name, const GLfloat *fv4);
+        void set_4fv(const char *parameter_name, int count, const GLfloat *fv4);
   
-        void set_1iv(const char *parameter_name, const GLint *iv1);
+        void set_1iv(const char *parameter_name, int count, const GLint *iv1);
   
-        void set_2iv(const char *parameter_name, const GLint *iv2);
+        void set_2iv(const char *parameter_name, int count, const GLint *iv2);
   
-        void set_3iv(const char *parameter_name, const GLint *iv3);
+        void set_3iv(const char *parameter_name, int count, const GLint *iv3);
   
-        void set_4iv(const char *parameter_name, const GLint *iv4);
+        void set_4iv(const char *parameter_name, int count, const GLint *iv4);
   
-        void set_1uiv(const char *parameter_name, const GLuint *uiv1);
+        void set_1uiv(const char *parameter_name, int count, const GLuint *uiv1);
   
-        void set_2uiv(const char *parameter_name, const GLuint *uiv2);
+        void set_2uiv(const char *parameter_name, int count, const GLuint *uiv2);
   
-        void set_3uiv(const char *parameter_name, const GLuint *uiv3);
+        void set_3uiv(const char *parameter_name, int count, const GLuint *uiv3);
   
-        void set_4uiv(const char *parameter_name, const GLuint *uiv4);
+        void set_4uiv(const char *parameter_name, int count, const GLuint *uiv4);
 };

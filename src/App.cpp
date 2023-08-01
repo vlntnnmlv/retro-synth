@@ -151,8 +151,12 @@ int App::init_video()
 
 void App::render()
 {
+    std::pair<int, const float*> sound_data = m_audio_engine.get_sound_data();
     m_shader_unit->m_setter.set_1f("in_Time", m_audio_engine.get_audio_time());
     m_shader_unit->m_setter.set_1f("in_Amplitude", m_audio_engine.get_amplitude());
+
+    m_shader_unit->m_setter.set_1f("in_SoundDataCount", sound_data.first);
+    m_shader_unit->m_setter.set_1fv("in_SoundData", sound_data.first, sound_data.second);
 
     // Redraw everything
     glClear(GL_COLOR_BUFFER_BIT);
