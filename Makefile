@@ -19,7 +19,7 @@ LIBRARIES              = -L$(GLEW_LIB_DIR) -L$(GLU_LIB_DIR) -lGLEW -lglu
 
 PREPROCESSOR_DIRECTIVES = -D__MACOSX_CORE__ --std=c++20
 
-NAME                   = retro-synth.app
+NAME                   = ./build/retro-synth.app
 
 all:
 	clang++ $(PREPROCESSOR_DIRECTIVES) $(SRC_DIR)*.cpp $(INCLUDE) $(FRAMEWORKS) $(LIBRARIES) -o $(NAME)

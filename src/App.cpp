@@ -3,7 +3,7 @@
 #include <streambuf>
 
 #include <SDL_image.h>
-#include <SDL_ttf.h>
+// #include <SDL_ttf.h>
 
 #include "App.h"
 #include "Utility.h"

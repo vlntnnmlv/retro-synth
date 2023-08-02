@@ -38,13 +38,13 @@ void main()
     //     out_Color = vec4(c, 1.0);
     // }
 
-    for (float i = -0.5 * uvx_width; i < 0.5 * uvx_width; i += 0.1)
-    {
-        int index = int(SOUND_DATA_SIZE * i);
-        if (uv.y <= in_SoundData[index])
-            out_Color = vec4(in_Amplitude, 0.0, 0.0, 1.0);
-    }
+    // for (float i = -0.5 * uvx_width; i < 0.5 * uvx_width; i += 0.1)
+    // {
+    //     int index = int(SOUND_DATA_SIZE * i);
+    //     if (uv.y <= in_SoundData[index])
+    //         out_Color = vec4(in_Amplitude, 0.0, 0.0, 1.0);
+    // }
 
-    // if (abs(wave(uv.x, in_Amplitude) - uv.y) < 0.01)
-    //     out_Color = vec4(in_Amplitude, 0.0, 0.0, 1.0);
+    if (abs(wave(uv.x, in_Amplitude) - uv.y) < 0.01)
+        out_Color = vec4(in_Amplitude, 0.0, 0.0, 1.0);
 }
