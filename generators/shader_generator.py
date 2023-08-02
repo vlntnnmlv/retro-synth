@@ -46,10 +46,6 @@ SRC_CONTENT = \
 """ % {"name" : CLASS_NAME }
 
 
-# TODO: pointer setters shoulbe be written other way
-# now, it thinks that you can pas array only of 1 to 4 values,
-# but @(params amount) can actualy be as big as you want,
-# and array will contain @(params amount) element of @(value_format)
 setter_function_template = Template( \
 """
 void %(name)s::set_$value_format(const char *parameter_name, $params_amount_parameter$parameter_names_with_types)
@@ -108,24 +104,20 @@ data = generate_types_data()
 header = open(f"./include/{CLASS_NAME}.h", 'w')
 header.write(HEADER_CONTENT)
 
-for parameter_format in data.keys():
-    header.write("  ");
-
-    function = setter_function_definition_template.substitute(data[parameter_format])
-    header.write(function)
-
-header.write("};\n")
-
-header.close()
-
-
 src = open(f"./src/{CLASS_NAME}.cpp", 'w')
 src.write(SRC_CONTENT)
 
 for parameter_format in data.keys():
+    header.write("  ");
     src.write("  ");
 
-    function = setter_function_template.substitute(data[parameter_format])
-    src.write(function)
+    function_defintion = setter_function_definition_template.substitute(data[parameter_format])
+    header.write(function_defintion)
 
+    function_realization = setter_function_template.substitute(data[parameter_format])
+    src.write(function_realization)
+
+header.write("};\n")
+
+header.close()
 src.close()
