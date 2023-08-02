@@ -5,6 +5,27 @@
 
 AudioEngine::AudioEngine()
 {
+    SDL_AudioSpec audio_spec_want, audio_spec;
+    SDL_memset(&audio_spec_want, 0, sizeof(audio_spec_want));
+
+    audio_spec_want.freq     = 44100;
+    audio_spec_want.format   = AUDIO_F32;
+    audio_spec_want.channels = 2;
+    audio_spec_want.samples  = 512;
+
+    audio_spec_want.callback = AudioEngine::callback;
+    audio_spec_want.userdata = this;
+
+    m_audio_device_id = SDL_OpenAudioDevice(NULL, 0, &audio_spec_want, &audio_spec, SDL_AUDIO_ALLOW_FORMAT_CHANGE);
+
+    if(!m_audio_device_id)
+    {
+        fprintf(stderr, "Error creating SDL audio device. SDL_Error: %s\n", SDL_GetError());
+        SDL_Quit();
+    }
+
+    SDL_PauseAudioDevice(m_audio_device_id, 0);
+
     m_current_notes = std::list<Note>();
 
     m_average_amplitude = 0;

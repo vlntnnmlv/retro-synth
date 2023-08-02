@@ -30,6 +30,7 @@ class AudioEngine
     private:
         void  on_callback(uint8_t* stream, int len);
 
+        SDL_AudioDeviceID m_audio_device_id;
         EnvelopeADSR m_envelope;
         Oscillator   m_oscillator;
         float        m_frequency;

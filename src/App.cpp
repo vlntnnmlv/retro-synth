@@ -71,27 +71,7 @@ int App::init()
 
 int App::init_audio()
 {
-    SDL_AudioSpec audio_spec_want, audio_spec;
-    SDL_memset(&audio_spec_want, 0, sizeof(audio_spec_want));
-
-    audio_spec_want.freq     = 44100;
-    audio_spec_want.format   = AUDIO_F32;
-    audio_spec_want.channels = 2;
-    audio_spec_want.samples  = 512;
-
-    audio_spec_want.callback = AudioEngine::callback;
-    audio_spec_want.userdata = &m_audio_engine;
-
-    m_audio_device_id = SDL_OpenAudioDevice(NULL, 0, &audio_spec_want, &audio_spec, SDL_AUDIO_ALLOW_FORMAT_CHANGE);
-
-    if(!m_audio_device_id)
-    {
-        fprintf(stderr, "Error creating SDL audio device. SDL_Error: %s\n", SDL_GetError());
-        SDL_Quit();
-        return -1;
-    }
-
-    SDL_PauseAudioDevice(m_audio_device_id, 0);
+    m_audio_engine = new AudioEngine();
 
     return 0;
 }
@@ -154,9 +134,9 @@ int App::init_video()
 
 void App::render()
 {
-    std::pair<int, const float*> sound_data = m_audio_engine.get_sound_data();
-    m_shader_unit->m_setter.set_1f("in_Time", m_audio_engine.get_audio_time());
-    m_shader_unit->m_setter.set_1f("in_Amplitude", m_audio_engine.get_amplitude());
+    std::pair<int, const float*> sound_data = m_audio_engine->get_sound_data();
+    m_shader_unit->m_setter.set_1f("in_Time", m_audio_engine->get_audio_time());
+    m_shader_unit->m_setter.set_1f("in_Amplitude", m_audio_engine->get_amplitude());
 
     m_shader_unit->m_setter.set_1f("in_SoundDataCount", sound_data.first);
     m_shader_unit->m_setter.set_1fv("in_SoundData", sound_data.first, sound_data.second);
@@ -230,7 +210,7 @@ Note App::key2note(SDL_Keycode key)
     if (index != -1)
     {
         note.type = (NoteType)index;
-        note.octave = m_audio_engine.get_octave();
+        note.octave = m_audio_engine->get_octave();
     }
 
     return note;
@@ -269,12 +249,12 @@ void App::poll_event()
 
         if (m_current_event.key.keysym.sym == SDLK_z)
         {
-            m_audio_engine.decrease_octave();
+            m_audio_engine->decrease_octave();
         }
 
         if (m_current_event.key.keysym.sym == SDLK_x)
         {
-            m_audio_engine.increase_octave();
+            m_audio_engine->increase_octave();
         }
 
         auto it = std::find(m_possible_keys.begin(), m_possible_keys.end(), m_current_event.key.keysym.sym);
@@ -301,7 +281,7 @@ bool App::try_add_input_note(Note note)
     if (it == m_pressed_notes.end())
     {
         m_pressed_notes.push_back(note);
-        m_audio_engine.update_input(m_pressed_notes);
+        m_audio_engine->update_input(m_pressed_notes);
         return true;
     }
     return false;
@@ -313,7 +293,7 @@ bool App::try_remove_input_note(Note note)
     if (it != m_pressed_notes.end())
     {
         m_pressed_notes.erase(it);
-        m_audio_engine.update_input(m_pressed_notes);
+        m_audio_engine->update_input(m_pressed_notes);
         return true;
     }
     return false;

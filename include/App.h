@@ -49,7 +49,7 @@ class App
         bool                     m_running;
 
         SDL_AudioDeviceID        m_audio_device_id;
-        AudioEngine              m_audio_engine;
+        AudioEngine              *m_audio_engine;
         std::list<Note>          m_pressed_notes;
         std::vector<SDL_Keycode> m_possible_keys;
 
