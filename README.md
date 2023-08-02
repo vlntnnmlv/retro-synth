@@ -16,7 +16,7 @@ Supports midi controllers and PC keyboard.
 
 **keyboard to notes mapping**
 
-![Layout](./images/layout.png)
+![Layout](./images/keyboard-layout.jpg)
 
 **Z** - switch ocatve down
 
