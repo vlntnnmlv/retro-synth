@@ -3,15 +3,15 @@
 
 #include "AudioEngine.h"
 
-AudioEngine::AudioEngine()
+AudioEngine::AudioEngine(int frequency, int channels, int samples)
 {
     SDL_AudioSpec audio_spec_want, audio_spec;
     SDL_memset(&audio_spec_want, 0, sizeof(audio_spec_want));
 
-    audio_spec_want.freq     = 44100;
+    audio_spec_want.freq     = frequency;
     audio_spec_want.format   = AUDIO_F32;
-    audio_spec_want.channels = 2;
-    audio_spec_want.samples  = 512;
+    audio_spec_want.channels = channels;
+    audio_spec_want.samples  = samples;
 
     audio_spec_want.callback = AudioEngine::callback;
     audio_spec_want.userdata = this;
@@ -37,11 +37,13 @@ AudioEngine::AudioEngine()
             std::pair<float, OscillatorType> { 0.3f, OscillatorType::SAW_ANALOG }
         }
     );
+
+    m_sound_data = new std::vector<float>(512);
 }
 
 AudioEngine::~AudioEngine()
 {
-    // TODO
+    SDL_CloseAudioDevice(m_audio_device_id);
 }
 
 float AudioEngine::get_audio_time()
@@ -64,17 +66,17 @@ int AudioEngine::get_octave()
     return m_octave;
 }
 
-std::pair<int, const float*> AudioEngine::get_sound_data()
+std::vector<float> *AudioEngine::get_sound_data()
 {
     return m_sound_data;
 }
 
-
 void AudioEngine::on_callback(uint8_t* stream, int len)
 {
     float *fstream = (float*)(stream);
-    int sid = 0;
-    for (; sid < (len / 8); ++sid)
+    std::vector<float> sound_data = std::vector<float>();
+
+    for (int sid = 0; sid < (len / 8); ++sid)
     {
         m_audio_time = (m_samples_played + sid) / 44100.0;
 
@@ -86,7 +88,7 @@ void AudioEngine::on_callback(uint8_t* stream, int len)
         float amplitude = 0.0f;
         float current_freq = 0.0f;
         float average_amplitude = 0.0f;
-        
+
         for (auto note = m_current_notes.begin(); note != m_current_notes.end(); ++note)
         {
             amplitude = m_envelope.get_amplitude(*note, m_audio_time);
@@ -112,11 +114,16 @@ void AudioEngine::on_callback(uint8_t* stream, int len)
         fstream[2 * sid + 0] = sound; /* Left  channel */
         fstream[2 * sid + 1] = sound; /* Right channel */
 
+        sound_data.push_back(sound / 100.0);
     }
 
-    // TODO: Find a better way to repsent wave data for shader
-    m_sound_data = std::pair<int, const float *>(sid, fstream);
-    
+    // std::cout << "Before clean: " << m_sound_data->size() << "\n";
+    m_sound_data->clear();
+    // std::cout << "After clean: " << m_sound_data->size() << "\n";
+    // std::cout << "Tmp        : " << sound_data.size() << "\n";
+    m_sound_data->insert(m_sound_data->begin(), sound_data.begin(), sound_data.end());
+    // std::cout << "After insert: " << m_sound_data->size() << "\n";
+
     m_samples_played += (len / 8);
 
     auto note = m_current_notes.begin();

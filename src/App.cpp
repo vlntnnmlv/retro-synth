@@ -41,12 +41,16 @@ App::App()
 
 App::~App()
 {
+    // Delete heap allocated objects
+    std::cout << "App removed\n";
+    delete m_audio_engine;
+    delete m_shader_unit;
+
     // Clean shaders
     SDL_GL_DeleteContext(m_gl_context);
 
     // Everything else
     SDL_DestroyWindow(m_window);
-    SDL_CloseAudioDevice(m_audio_device_id);
     SDL_Quit();
 }
 
@@ -71,7 +75,7 @@ int App::init()
 
 int App::init_audio()
 {
-    m_audio_engine = new AudioEngine();
+    m_audio_engine = new AudioEngine(44100, 2, 512);
 
     return 0;
 }
@@ -129,17 +133,35 @@ int App::init_video()
     // Initialize Shaders
     m_shader_unit = new ShaderUnit(m_window_width, m_window_height);
 
+    std::vector<float> sound_data = std::vector<float>(512);
+    glGenTextures(1, &m_gl_tex);
+    // glActiveTexture(GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_2D, m_gl_tex);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, 512, 1, 0, GL_RGB, GL_UNSIGNED_BYTE, NULL);
+    // glUniform1i(glGetUniformLocation(m_shader_unit->m_gl_program_id, "in_AudioData"), 0);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S,     GL_CLAMP_TO_BORDER);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T,     GL_CLAMP_TO_BORDER);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    // glEnable(GL_BLEND);
+    // glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
     return 0;
 }
 
 void App::render()
 {
-    std::pair<int, const float*> sound_data = m_audio_engine->get_sound_data();
+    ///
+    glActiveTexture(GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_2D, m_gl_tex);
+    std::vector<float> *sound_data = m_audio_engine->get_sound_data();
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, 512, 1, 0, GL_RGB, GL_UNSIGNED_BYTE, sound_data->data());
+    // std::cout << sound_data->size() << "\n";
+    glUniform1i(glGetUniformLocation(m_shader_unit->m_gl_program_id, "in_AudioData"), 0);
+    ///
+
     m_shader_unit->m_setter.set_1f("in_Time", m_audio_engine->get_audio_time());
     m_shader_unit->m_setter.set_1f("in_Amplitude", m_audio_engine->get_amplitude());
-
-    m_shader_unit->m_setter.set_1f("in_SoundDataCount", sound_data.first);
-    m_shader_unit->m_setter.set_1fv("in_SoundData", sound_data.first, sound_data.second);
 
     // Redraw everything
     glClear(GL_COLOR_BUFFER_BIT);
@@ -182,11 +204,11 @@ void App::loop()
     {
         if (message[0] == 156)
         {
-            try_add_input_note(midi_key2note(message));
+            try_add_input_note(key2note(message));
         }
         if (message[0] == 140)
         {
-            try_remove_input_note(midi_key2note(message));
+            try_remove_input_note(key2note(message));
         }
     }
 
@@ -216,17 +238,13 @@ Note App::key2note(SDL_Keycode key)
     return note;
 }
 
-Note App::midi_key2note(std::vector<unsigned char> midi_key)
+Note App::key2note(std::vector<unsigned char> midi_key)
 {
     Note note;
-    std::cout << "Note id " << (int)midi_key[1] << "\n";
     note.type = (NoteType)((int)midi_key[1] % 12);
-    std::cout << "Note type " << note.octave << "\n";
     note.octave = (int)(midi_key[1] / 12);
-    std::cout << "Note octave " << note.octave << "\n";
     return note;
 }
-
 
 void App::poll_event()
 {

@@ -23,10 +23,6 @@ class App
         void start();
 
     private:
-
-        ShaderUnit *m_shader_unit;
-        RtMidiIn m_MIDI_in;
-
         int init();
         int init_audio();
         int init_window();
@@ -40,21 +36,26 @@ class App
         bool try_remove_input_note(Note note);
 
         Note key2note(SDL_Keycode key);
-        Note midi_key2note(std::vector<unsigned char> midi_key);
+        Note key2note(std::vector<unsigned char> midi_key);
 
+        bool                     m_running;
         SDL_Window*              m_window;
         int                      m_window_width;
         int                      m_window_height;
         SDL_Event                m_current_event;
-        bool                     m_running;
 
-        SDL_AudioDeviceID        m_audio_device_id;
         AudioEngine              *m_audio_engine;
-        std::list<Note>          m_pressed_notes;
-        std::vector<SDL_Keycode> m_possible_keys;
+        SDL_AudioDeviceID        m_audio_device_id;
+        ShaderUnit               *m_shader_unit;
 
+        std::vector<SDL_Keycode> m_possible_keys;
+        std::list<Note>          m_pressed_notes;
         SDL_GLContext            m_gl_context;
 
-        float                    m_time;
+        RtMidiIn                 m_MIDI_in;
+
         float                    m_delta_time;
+        float                    m_time;
+
+        GLuint                   m_gl_tex;
 };

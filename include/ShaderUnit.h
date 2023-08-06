@@ -23,11 +23,12 @@ class ShaderUnit
 
         ShaderParameterSetter m_setter;
 
+        GLuint                   m_gl_program_id;
+
     private:
         std::string              *m_gl_vertex_shader_content;
         std::string              *m_gl_fragment_shader_content;
 
-        GLuint                   m_gl_program_id;
         GLuint                   m_gl_vertex_shader;
         GLuint                   m_gl_fragment_shader;
 

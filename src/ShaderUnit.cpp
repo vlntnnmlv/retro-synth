@@ -73,7 +73,9 @@ void ShaderUnit::init_shaders()
     m_gl_program_id = glCreateProgram();
     glAttachShader(m_gl_program_id, m_gl_vertex_shader);
     glAttachShader(m_gl_program_id, m_gl_fragment_shader);
+
     glBindFragDataLocation(m_gl_program_id, 0, "out_Color");
+
     glLinkProgram(m_gl_program_id);
     glUseProgram(m_gl_program_id);
 
