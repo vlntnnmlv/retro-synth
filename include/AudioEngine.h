@@ -16,6 +16,8 @@ class AudioEngine
         AudioEngine(int frequency, int channels, int samples);
         ~AudioEngine();
 
+        void  init();
+
         void  update_input(std::list<Note> notes_pressed);
         void  increase_octave();
         void  decrease_octave();
@@ -31,8 +33,11 @@ class AudioEngine
     private:
         void on_callback(uint8_t* stream, int len);
 
+        int m_frequency;
+        int m_channels;
+        int m_samples;
+
         SDL_AudioDeviceID m_audio_device_id;
-        float             m_frequency;
         float             m_average_amplitude;
         float             m_audio_time;
         int               m_samples_played;

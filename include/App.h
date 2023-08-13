@@ -21,9 +21,9 @@ class App
         ~App();
 
         void start();
+        int init(AudioEngine *audio_engine);
 
     private:
-        int init();
         int init_audio();
         int init_window();
         int init_video();

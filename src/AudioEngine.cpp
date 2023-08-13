@@ -3,15 +3,28 @@
 
 #include "AudioEngine.h"
 
-AudioEngine::AudioEngine(int frequency, int channels, int samples)
+AudioEngine::AudioEngine(int frequency, int channels, int samples):
+m_frequency(frequency),
+m_channels(channels),
+m_samples(samples)
+{
+
+}
+
+AudioEngine::~AudioEngine()
+{
+    SDL_CloseAudioDevice(m_audio_device_id);
+}
+
+void AudioEngine::init()
 {
     SDL_AudioSpec audio_spec_want, audio_spec;
     SDL_memset(&audio_spec_want, 0, sizeof(audio_spec_want));
 
-    audio_spec_want.freq     = frequency;
+    audio_spec_want.freq     = m_frequency;
     audio_spec_want.format   = AUDIO_F32;
-    audio_spec_want.channels = channels;
-    audio_spec_want.samples  = samples;
+    audio_spec_want.channels = m_channels;
+    audio_spec_want.samples  = m_samples;
 
     audio_spec_want.callback = AudioEngine::callback;
     audio_spec_want.userdata = this;
@@ -39,11 +52,6 @@ AudioEngine::AudioEngine(int frequency, int channels, int samples)
     );
 
     m_sound_data = new std::vector<float>(512);
-}
-
-AudioEngine::~AudioEngine()
-{
-    SDL_CloseAudioDevice(m_audio_device_id);
 }
 
 float AudioEngine::get_audio_time()

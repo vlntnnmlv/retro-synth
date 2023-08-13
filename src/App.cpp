@@ -35,15 +35,12 @@ App::App()
 
     m_delta_time = 0;
     m_time = 0;
-
-    init();
 }
 
 App::~App()
 {
     // Delete heap allocated objects
     std::cout << "App removed\n";
-    delete m_audio_engine;
     delete m_shader_unit;
 
     // Clean shaders
@@ -54,7 +51,7 @@ App::~App()
     SDL_Quit();
 }
 
-int App::init()
+int App::init(AudioEngine *audio_engine)
 {
     // SDL subsystems initialization
     if(SDL_Init(SDL_INIT_AUDIO | SDL_INIT_VIDEO) < 0)
@@ -63,10 +60,9 @@ int App::init()
         return 1;
     }
 
-    // Find and initialize audio engine
-    init_audio();
+    m_audio_engine = audio_engine;
 
-    // Create application window
+    init_audio();
     init_window();
     init_video();
 
@@ -75,7 +71,7 @@ int App::init()
 
 int App::init_audio()
 {
-    m_audio_engine = new AudioEngine(44100, 2, 512);
+    m_audio_engine->init();
 
     return 0;
 }
