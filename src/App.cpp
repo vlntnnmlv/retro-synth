@@ -3,7 +3,6 @@
 #include <streambuf>
 
 #include <SDL_image.h>
-// #include <SDL_ttf.h>
 
 #include "App.h"
 #include "Utility.h"
@@ -185,10 +184,7 @@ void App::loop()
 {
     Uint64 frame_start_time = SDL_GetPerformanceCounter();
     
-    while(SDL_PollEvent(&m_current_event) != 0)
-    {
-        poll_event();
-    }
+    poll_event();
 
     std::vector<unsigned char> message;
     int nBytes, i;
@@ -244,49 +240,52 @@ Note App::key2note(std::vector<unsigned char> midi_key)
 
 void App::poll_event()
 {
-    if(m_current_event.type == SDL_QUIT)
-        m_running = false;
-    if (m_current_event.type == SDL_WINDOWEVENT && m_current_event.window.event == SDL_WINDOWEVENT_RESIZED)
+    while(SDL_PollEvent(&m_current_event) != 0)
     {
-        SDL_Window* win = SDL_GetWindowFromID(m_current_event.window.windowID);
-        if (win == m_window)
-        {
-            m_window_width = m_current_event.window.data1;
-            m_window_height = m_current_event.window.data2;
-        }
-    }
-
-    if (m_current_event.type == SDL_KEYDOWN)
-    {
-        if (m_current_event.key.keysym.sym == SDLK_ESCAPE)
+        if(m_current_event.type == SDL_QUIT)
             m_running = false;
-
-        if (m_current_event.key.keysym.sym == SDLK_z)
+        if (m_current_event.type == SDL_WINDOWEVENT && m_current_event.window.event == SDL_WINDOWEVENT_RESIZED)
         {
-            m_audio_engine->decrease_octave();
+            SDL_Window* win = SDL_GetWindowFromID(m_current_event.window.windowID);
+            if (win == m_window)
+            {
+                m_window_width = m_current_event.window.data1;
+                m_window_height = m_current_event.window.data2;
+            }
         }
 
-        if (m_current_event.key.keysym.sym == SDLK_x)
+        if (m_current_event.type == SDL_KEYDOWN)
         {
-            m_audio_engine->increase_octave();
-        }
+            if (m_current_event.key.keysym.sym == SDLK_ESCAPE)
+                m_running = false;
 
-        auto it = std::find(m_possible_keys.begin(), m_possible_keys.end(), m_current_event.key.keysym.sym);
-        if (it != m_possible_keys.end())
-        {
-            Note note = key2note(m_current_event.key.keysym.sym);
-            try_add_input_note(note);
+            if (m_current_event.key.keysym.sym == SDLK_z)
+            {
+                m_audio_engine->decrease_octave();
+            }
+
+            if (m_current_event.key.keysym.sym == SDLK_x)
+            {
+                m_audio_engine->increase_octave();
+            }
+
+            auto it = std::find(m_possible_keys.begin(), m_possible_keys.end(), m_current_event.key.keysym.sym);
+            if (it != m_possible_keys.end())
+            {
+                Note note = key2note(m_current_event.key.keysym.sym);
+                try_add_input_note(note);
+            }
         }
+        if (m_current_event.type == SDL_KEYUP)
+        {
+            auto it = std::find(m_possible_keys.begin(), m_possible_keys.end(), m_current_event.key.keysym.sym);
+            if (it != m_possible_keys.end())
+            {
+                Note note = key2note(m_current_event.key.keysym.sym);
+                try_remove_input_note(note);
+            }
+        }   
     }
-    if (m_current_event.type == SDL_KEYUP)
-    {
-        auto it = std::find(m_possible_keys.begin(), m_possible_keys.end(), m_current_event.key.keysym.sym);
-        if (it != m_possible_keys.end())
-        {
-            Note note = key2note(m_current_event.key.keysym.sym);
-            try_remove_input_note(note);
-        }
-    }   
 }
 
 bool App::try_add_input_note(Note note)

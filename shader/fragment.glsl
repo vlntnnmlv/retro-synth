@@ -22,5 +22,6 @@ void main()
     int tx = int(((uv.x + 0.5 * uv_size.x) / uv_size.x) * 512.0);
     float wave = texelFetch(in_AudioData, ivec2(tx, 0), 0).x;
 
-    out_Color += 1.0 - smoothstep(0.0, 0.01, abs(wave - uv.y));
+    if (abs(uv.y) < in_Amplitude)
+        out_Color = vec4(1.0, 0.0, 0.0, 1.0);
 }

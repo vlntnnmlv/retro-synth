@@ -45,8 +45,8 @@ class App
         SDL_Event                m_current_event;
 
         AudioEngine              *m_audio_engine;
-        SDL_AudioDeviceID        m_audio_device_id;
         ShaderUnit               *m_shader_unit;
+        SDL_AudioDeviceID        m_audio_device_id;
 
         std::vector<SDL_Keycode> m_possible_keys;
         std::list<Note>          m_pressed_notes;
