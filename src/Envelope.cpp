@@ -4,7 +4,7 @@ EnvelopeADSR::EnvelopeADSR()
 {
     attackPeriod = 0.05f;
     decayPeriod = 0.01f;
-    releasePeriod = 0.01f;
+    releasePeriod = 0.5f;
 
     attackAmplitude = 0.7f;
     sustainAmplitude = 0.5f;
@@ -42,7 +42,7 @@ float EnvelopeADSR::get_amplitude_for_pressed_key(Note note, float time) const
     // Attack
     if (lifeTime <= attackPeriod)
     {
-        return (lifeTime / attackPeriod) * attackAmplitude;// + get_amplitude_for_released_key(note, time);
+        return (lifeTime / attackPeriod) * attackAmplitude;
     }
 
     // Decay
@@ -58,9 +58,4 @@ float EnvelopeADSR::get_amplitude_for_pressed_key(Note note, float time) const
     }
 
     return 0.0f;
-}
-
-float EnvelopeADSR::get_amplitude_for_released_key(Note note, float time) const
-{
-    return ((time - note.time_off) / releasePeriod) * (0.0f - sustainAmplitude) + get_amplitude_for_pressed_key(note, time);
 }

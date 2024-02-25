@@ -6,19 +6,15 @@
 #include <GL/glew.h>
 #include <GL/glu.h>
 
-#include "Utility.h"
-#include "AudioEngine.h"
 #include "ShaderParameterSetter.h"
 
 class ShaderUnit
 {
     public:
         ShaderUnit();
-        ShaderUnit(float screen_width, float screen_height);
         ~ShaderUnit();
 
         void   init_shaders();
-        void   init_geometry(float window_width, float window_height);
         void   init_textures();
 
         ShaderParameterSetter m_setter;

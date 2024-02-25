@@ -26,7 +26,7 @@ float Oscillator::F2AV(float frequency) const
 
 float Oscillator::sinus(float frequency, float time) const
 {
-    return sin(F2AV(frequency) * time + 0.01f * frequency * sin(F2AV(5.0f) * time));
+    return sin(F2AV(frequency) * time + 0.01f * frequency * sin(F2AV(5.0f) * time)); // some simple LFO here, should be a modifier
 }
 
 float Oscillator::square(float frequency, float time) const

@@ -25,7 +25,6 @@ void AudioEngine::init()
     audio_spec_want.format   = AUDIO_F32;
     audio_spec_want.channels = m_channels;
     audio_spec_want.samples  = m_samples;
-
     audio_spec_want.callback = AudioEngine::callback;
     audio_spec_want.userdata = this;
 
@@ -34,17 +33,16 @@ void AudioEngine::init()
     if(!m_audio_device_id)
     {
         fprintf(stderr, "Error creating SDL audio device. SDL_Error: %s\n", SDL_GetError());
-        SDL_Quit();
+        SDL_Quit(); // not good, because AudioEngine shouldn't control main application
     }
 
     SDL_PauseAudioDevice(m_audio_device_id, 0);
 
     m_current_notes = std::list<Note>();
-
     m_average_amplitude = 0;
-
     m_octave = 4;
     m_envelope = EnvelopeADSR();
+
     m_instrument = Instrument(std::list<std::pair<float, OscillatorType>>
         {
             std::pair<float, OscillatorType> { 0.3f, OscillatorType::SAW_ANALOG }
@@ -112,12 +110,12 @@ void AudioEngine::on_callback(uint8_t* stream, int len)
             sound += amplitude * current_freq;
         }
 
-        if (notes_quantity != 0)
+        if (notes_quantity > 1)
             average_amplitude /= (float)notes_quantity;
-        else
-            average_amplitude = 0;
         
         m_average_amplitude = average_amplitude;
+
+        // std::cout << "[T: " << m_audio_time << "] Sound V: " << sound << "\n";
 
         fstream[2 * sid + 0] = sound; /* Left  channel */
         fstream[2 * sid + 1] = sound; /* Right channel */
@@ -125,12 +123,8 @@ void AudioEngine::on_callback(uint8_t* stream, int len)
         sound_data.push_back(sound / 100.0);
     }
 
-    // std::cout << "Before clean: " << m_sound_data->size() << "\n";
     m_sound_data->clear();
-    // std::cout << "After clean: " << m_sound_data->size() << "\n";
-    // std::cout << "Tmp        : " << sound_data.size() << "\n";
     m_sound_data->insert(m_sound_data->begin(), sound_data.begin(), sound_data.end());
-    // std::cout << "After insert: " << m_sound_data->size() << "\n";
 
     m_samples_played += (len / 8);
 

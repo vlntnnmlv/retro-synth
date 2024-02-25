@@ -17,5 +17,4 @@ struct EnvelopeADSR
 
     private:
         float get_amplitude_for_pressed_key(Note note, float time) const;
-        float get_amplitude_for_released_key(Note note, float time) const;
 };
