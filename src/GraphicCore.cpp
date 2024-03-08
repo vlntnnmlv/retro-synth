@@ -3,10 +3,12 @@
 #include <GL/glew.h>
 #include <iostream>
 
-
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
+
+#define CAMERA_MOVE_SPEED 0.3f;
+#define FOV_CHANGE_RATE   0.1f;
 
 GraphicCore::GraphicCore(int i_screenWidth, int i_screenHeight)
 {
@@ -56,12 +58,19 @@ GraphicCore::~GraphicCore()
 void GraphicCore::start()
 {
     m_running = true;
-    
+
+    m_cameraOffsetX = 0.0f;
+    m_cameraOffsetY = 0.0f;
+    m_cameraOffsetZ = 0.0f;
+
+    m_FOV = 60.0f;
+
+    // Create all objects    
     m_mesh = new Mesh(1.0f);
     m_mesh2 = new Mesh(0.5f);
-    m_shaderUnit = new ShaderUnit();
 
-    m_keyPressed = false;
+    // Create all shaders
+    m_shaderUnit = new ShaderUnit();
 
     while (m_running)
     {
@@ -81,38 +90,35 @@ void GraphicCore::loop()
         if(m_currentEvent.type == SDL_QUIT)
             m_running = false;
 
-        if (m_currentEvent.type == SDL_KEYDOWN)
-        {
-            if (m_currentEvent.key.keysym.sym == SDLK_ESCAPE)
-                m_running = false;
-
-            if (m_currentEvent.key.keysym.sym == SDLK_w)
-            {
-                m_keyPressed = true;
-            }
-
-            if (m_currentEvent.key.keysym.sym == SDLK_s)
-            {
-                m_keyPressed = true;
-            }
-        }
-
-        if (m_currentEvent.type == SDL_KEYUP)
-        {
-            if (m_currentEvent.key.keysym.sym == SDLK_w)
-            {
-                m_keyPressed = false;
-            }
-
-            if (m_currentEvent.key.keysym.sym == SDLK_s)
-            {
-                m_keyPressed = false;
-            }
-        }
+        m_inputManager.processEvent(m_currentEvent);
     }
 
-    if (m_keyPressed)
-        m_testVariable += 0.01f;
+    if (m_inputManager.m_keysState[SDLK_ESCAPE])
+        m_running = false;
+
+    if (m_inputManager.m_keysState[SDLK_w])
+        m_cameraOffsetZ += CAMERA_MOVE_SPEED;
+
+    if (m_inputManager.m_keysState[SDLK_s])
+        m_cameraOffsetZ -= CAMERA_MOVE_SPEED;
+
+    if (m_inputManager.m_keysState[SDLK_a])
+        m_cameraOffsetX += CAMERA_MOVE_SPEED;
+
+    if (m_inputManager.m_keysState[SDLK_d])
+        m_cameraOffsetX -= CAMERA_MOVE_SPEED;
+
+    if (m_inputManager.m_keysState[SDLK_u])
+        m_cameraOffsetY -= CAMERA_MOVE_SPEED;
+
+    if (m_inputManager.m_keysState[SDLK_j])
+        m_cameraOffsetY += CAMERA_MOVE_SPEED;
+
+    if (m_inputManager.m_keysState[SDLK_i])
+        m_FOV += FOV_CHANGE_RATE;
+
+    if (m_inputManager.m_keysState[SDLK_o])
+        m_FOV -= FOV_CHANGE_RATE;
 
     glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
 
@@ -122,10 +128,10 @@ void GraphicCore::loop()
 
     // view matrix
     glm::mat4 view = glm::mat4(1.0f);
-    view = glm::translate(view, glm::vec3(0.0f, 0.0f, -3.0f));
+    view = glm::translate(view, glm::vec3(0.0f + m_cameraOffsetX, 0.0f + m_cameraOffsetY, -3.0f + m_cameraOffsetZ));
 
     // projection matrix
-    glm::mat4 projection = glm::perspective(glm::radians(60.0f), float(m_screenWidth)/(float)m_screenHeight, 0.1f, 100.0f);
+    glm::mat4 projection = glm::perspective(glm::radians(m_FOV), float(m_screenWidth)/(float)m_screenHeight, 0.1f, 100.0f);
 
     int modelLoc = glGetUniformLocation(m_shaderUnit->m_gl_program_id, "model");
     glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model)); // TODO: move this setter to the generator

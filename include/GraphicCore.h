@@ -2,6 +2,8 @@
 
 #include <SDL2/SDL.h>
 
+#include "InputManager.h"
+
 #include "Mesh.h"
 #include "ShaderUnit.h"
 
@@ -29,6 +31,10 @@ class GraphicCore
         int m_screenWidth;
         int m_screenHeight;
 
-        float m_testVariable;
-        bool  m_keyPressed;
+        float m_cameraOffsetX;
+        float m_cameraOffsetY;
+        float m_cameraOffsetZ;
+        float m_FOV;
+
+        InputManager m_inputManager;
 };
