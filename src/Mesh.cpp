@@ -8,13 +8,24 @@ Mesh::Mesh(float i_scale)
     glBindVertexArray(m_vertexArrayID);
 
     GLfloat vertices[] = {
-       i_scale *  0.5f, i_scale * -0.5f, 0.5f,
-       i_scale * -0.5f, i_scale * -0.5f, 0.5f,
-       i_scale *  0.5f, i_scale *  0.5f, 0.5f,
-       i_scale * -0.5f, i_scale *  0.5f, 0.5f
+         0.5f, -0.5f,  0.5f,
+        -0.5f, -0.5f,  0.5f,
+         0.5f,  0.5f,  0.5f,
+        -0.5f,  0.5f,  0.5f,
+         0.5f, -0.5f, -0.5f,
+        -0.5f, -0.5f, -0.5f,
+         0.5f,  0.5f, -0.5f,
+        -0.5f,  0.5f, -0.5f
     };
 
-    GLint triangles[] = { 0, 2, 3, 0, 3, 1 };
+    GLint triangles[] = {
+                          0, 2, 3, 0, 3, 1,
+                          2, 6, 7, 2, 7, 3,
+                          6, 4, 5, 6, 5, 7,
+                          4, 0, 1, 4, 1, 5,
+                          1, 3, 7, 1, 7, 5,
+                          4, 6, 2, 4, 2, 0
+                        };
 
     glGenBuffers(1, &m_vertexBuffer);
     glBindBuffer(GL_ARRAY_BUFFER, m_vertexBuffer); // setting this buffer active?

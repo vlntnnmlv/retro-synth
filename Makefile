@@ -27,3 +27,6 @@ NAME                   = ./build/retro-synth #somehow new macOS Sonoma doesn't a
 all:
 	clang++ $(PREPROCESSOR_DIRECTIVES) $(SRC_DIR)*.cpp $(INCLUDE) $(FRAMEWORKS) $(LIBRARIES) -o $(NAME)
 
+run: all
+	$(NAME)
+

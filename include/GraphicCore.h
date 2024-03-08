@@ -15,6 +15,9 @@ class GraphicCore
         Mesh       *m_mesh2;
         ShaderUnit *m_shaderUnit;
 
+        float m_deltaTime;
+        float m_time;
+
         void start();
         void loop();
         bool m_running;
@@ -25,4 +28,7 @@ class GraphicCore
 
         int m_screenWidth;
         int m_screenHeight;
+
+        float m_testVariable;
+        bool  m_keyPressed;
 };
