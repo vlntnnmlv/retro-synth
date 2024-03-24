@@ -67,7 +67,7 @@ void GraphicCore::start()
 
     // Create all objects    
     m_mesh = new Mesh(1.0f);
-    m_mesh2 = new Mesh(0.5f);
+    m_mesh2 = new Mesh(10, 10, 0.5f);
 
     // Create all shaders
     m_shaderUnit = new ShaderUnit();
@@ -124,7 +124,7 @@ void GraphicCore::loop()
 
     // model matrix
     glm::mat4 model = glm::mat4(1.0f);
-    model = glm::rotate(model, glm::radians(50.0f), glm::vec3(0.5f, 1.0f, 0.0f));
+    // model = glm::rotate(model, glm::radians(50.0f), glm::vec3(0.5f, 1.0f, 0.0f));
 
     // view matrix
     glm::mat4 view = glm::mat4(1.0f);
@@ -145,7 +145,12 @@ void GraphicCore::loop()
     glUseProgram(m_shaderUnit->m_gl_program_id);
     glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 
+    m_shaderUnit->m_setter.set_3f("custom_color", 1.0f, 1.0f, 1.0f);
+
     m_mesh->draw();
+
+    m_shaderUnit->m_setter.set_3f("custom_color", 0.4f, 0.9f, 0.2f);
+
     m_mesh2->draw();
 
     SDL_GL_SwapWindow(m_window);

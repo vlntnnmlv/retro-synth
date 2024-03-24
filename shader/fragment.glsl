@@ -1,8 +1,9 @@
 #version 330 core
 
 out vec3 color;
+uniform vec3 custom_color;
 
 void main()
 {
-    color = vec3(0.7,1,1);
+    color = custom_color;
 }
