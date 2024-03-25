@@ -8,7 +8,7 @@ class Mesh
 {
     public:
         Mesh(float i_scale); // identity cube
-        Mesh(int i_width, int i_height, float i_scale); // plane
+        Mesh(int i_qWidth, int i_qHeight, float i_qSize); // plane
         ~Mesh();
 
         void draw();

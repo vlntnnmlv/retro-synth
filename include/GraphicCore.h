@@ -3,6 +3,7 @@
 #include <SDL2/SDL.h>
 
 #include "InputManager.h"
+#include "ImageLoader.h"
 
 #include "Mesh.h"
 #include "ShaderUnit.h"
@@ -37,4 +38,8 @@ class GraphicCore
         float m_FOV;
 
         InputManager m_inputManager;
+        ImageLoader *m_imageLoader;
+
+        GLuint m_textureUniformID;
+        GLuint m_textureID;
 };

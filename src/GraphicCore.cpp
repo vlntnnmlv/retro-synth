@@ -1,4 +1,5 @@
 #include "GraphicCore.h"
+#include "lodepng.h"
 
 #include <GL/glew.h>
 #include <iostream>
@@ -48,6 +49,8 @@ GraphicCore::GraphicCore(int i_screenWidth, int i_screenHeight)
     GLenum glewError = glewInit();
     if (glewError != GLEW_OK)
         std::cout << "Error initializing GLEW!: " << glewGetErrorString(glewError) << "\n";
+
+    // m_imageLoader = new ImageLoader(m_window);
 }
 
 GraphicCore::~GraphicCore()
@@ -67,10 +70,41 @@ void GraphicCore::start()
 
     // Create all objects    
     m_mesh = new Mesh(1.0f);
-    m_mesh2 = new Mesh(10, 10, 0.5f);
+    m_mesh2 = new Mesh(1, 1, 10.0f);
 
     // Create all shaders
     m_shaderUnit = new ShaderUnit();
+
+    // ----- TEXTURING -----
+    GLint colAttrib = glGetAttribLocation(m_shaderUnit->m_gl_program_id, "color");
+    glEnableVertexAttribArray(colAttrib);
+    glVertexAttribPointer(colAttrib, 3, GL_FLOAT, GL_FALSE, 7 * sizeof(float),
+            (void*) (2 * sizeof(GLfloat)));
+
+    GLint texAttrib = glGetAttribLocation(m_shaderUnit->m_gl_program_id, "texcoord");
+    glEnableVertexAttribArray(texAttrib);
+    glVertexAttribPointer(texAttrib, 2, GL_FLOAT, GL_FALSE, 7 * sizeof(float),
+            (void*) (5 * sizeof(GLfloat)));
+
+    glGenTextures(1, &m_textureID);
+    glBindTexture(GL_TEXTURE_2D, m_textureID);
+
+    std::vector<unsigned char> image;
+    unsigned width, height;
+    unsigned error = lodepng::decode(image, width, height, "./textures/block.png");
+
+    if (error != 0)
+        std::cout << "error " << error << ": " << lodepng_error_text(error) << std::endl;
+
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, &image[0]);
+
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+    m_textureUniformID = glGetUniformLocation(m_shaderUnit->m_gl_program_id, "in_texture");
+    // ----- TEXTURING -----
 
     while (m_running)
     {
@@ -122,13 +156,15 @@ void GraphicCore::loop()
 
     glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
 
+    // -- Camera settings --
+
     // model matrix
     glm::mat4 model = glm::mat4(1.0f);
-    // model = glm::rotate(model, glm::radians(50.0f), glm::vec3(0.5f, 1.0f, 0.0f));
+    model = glm::rotate(model, glm::radians(50.0f), glm::vec3(1.0f, 0.0f, 0.0f));
 
     // view matrix
     glm::mat4 view = glm::mat4(1.0f);
-    view = glm::translate(view, glm::vec3(0.0f + m_cameraOffsetX, 0.0f + m_cameraOffsetY, -3.0f + m_cameraOffsetZ));
+    view = glm::translate(view, glm::vec3(m_cameraOffsetX, m_cameraOffsetY, -15.0f + m_cameraOffsetZ));
 
     // projection matrix
     glm::mat4 projection = glm::perspective(glm::radians(m_FOV), float(m_screenWidth)/(float)m_screenHeight, 0.1f, 100.0f);
@@ -142,12 +178,21 @@ void GraphicCore::loop()
     int projectionLoc = glGetUniformLocation(m_shaderUnit->m_gl_program_id, "projection");
     glUniformMatrix4fv(projectionLoc, 1, GL_FALSE, glm::value_ptr(projection));
 
+    // -- Camera settings --
+
+
+    // --- USE TEXTURE
+    glActiveTexture(GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_2D, m_textureID);
+    glUniform1i(m_textureUniformID, 0);
+    // --- USE TEXTURE
+
     glUseProgram(m_shaderUnit->m_gl_program_id);
     glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 
-    m_shaderUnit->m_setter.set_3f("custom_color", 1.0f, 1.0f, 1.0f);
+    // m_shaderUnit->m_setter.set_3f("custom_color", 1.0f, 1.0f, 1.0f);
 
-    m_mesh->draw();
+    // m_mesh->draw();
 
     m_shaderUnit->m_setter.set_3f("custom_color", 0.4f, 0.9f, 0.2f);
 

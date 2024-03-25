@@ -3,7 +3,7 @@
 
 Mesh::Mesh(float i_scale)
 {
-    std::cout << "Creating cube mesh...\n";
+    std::cout << "Creating identity-cube mesh...\n";
     glGenVertexArrays(1, &m_vertexArrayID);
     glBindVertexArray(m_vertexArrayID);
 
@@ -40,19 +40,19 @@ Mesh::Mesh(float i_scale)
     std::cout << "Mesh created!\n";
 }
 
-Mesh::Mesh(int numQuadsWidth, int numQuadsHeight, float quadSize)
+Mesh::Mesh(int i_qWidth, int i_qHeight, float i_qSize)
 {
     std::cout << "Creating multi-quad plane mesh...\n";
     glGenVertexArrays(1, &m_vertexArrayID);
     glBindVertexArray(m_vertexArrayID);
 
     // Total number of vertices across the width and height
-    int numVerticesWidth = numQuadsWidth + 1;
-    int numVerticesHeight = numQuadsHeight + 1;
+    int numVerticesWidth = i_qWidth + 1;
+    int numVerticesHeight = i_qHeight + 1;
 
     // Calculate the total number of vertices and indices
     int totalVertices = numVerticesWidth * numVerticesHeight;
-    int totalQuads = numQuadsWidth * numQuadsHeight;
+    int totalQuads = i_qWidth * i_qHeight;
     int totalIndices = totalQuads * 6; // 6 indices per quad (2 triangles)
 
     std::vector<GLfloat> vertices;
@@ -61,15 +61,15 @@ Mesh::Mesh(int numQuadsWidth, int numQuadsHeight, float quadSize)
     // Generate vertices
     for (int y = 0; y < numVerticesHeight; ++y) {
         for (int x = 0; x < numVerticesWidth; ++x) {
-            vertices.push_back(x * quadSize - (numQuadsWidth * quadSize / 2.0f)); // X
+            vertices.push_back(x * i_qSize - (i_qWidth * i_qSize / 2.0f)); // X
             vertices.push_back(0.0f);                                               // Y
-            vertices.push_back(y * quadSize - (numQuadsHeight * quadSize / 2.0f)); // Z
+            vertices.push_back(y * i_qSize - (i_qHeight * i_qSize / 2.0f)); // Z
         }
     }
 
     // Generate indices for each quad
-    for (int y = 0; y < numQuadsHeight; ++y) {
-        for (int x = 0; x < numQuadsWidth; ++x) {
+    for (int y = 0; y < i_qHeight; ++y) {
+        for (int x = 0; x < i_qWidth; ++x) {
             int topLeft = y * numVerticesWidth + x;
             int topRight = topLeft + 1;
             int bottomLeft = topLeft + numVerticesWidth;

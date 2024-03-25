@@ -2,6 +2,8 @@
 
 #include "ShaderUnit.h"
 #include "Utility.h"
+#include <SDL_image.h>
+
 
 ShaderUnit::ShaderUnit()
 {
